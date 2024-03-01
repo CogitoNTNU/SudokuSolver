@@ -1,9 +1,13 @@
-import styles from "./page.module.css";
+'use client'
+import Camera from "./components/Camera/Camera";
+import styles from "./page.module.scss"; 
 
 export default function Home() {
-  return (
-    <main className={styles.main}>
-      Sudoku Solver
-    </main>
-  );
+    
+
+    return (
+        <main className={styles.main}>
+            <Camera />
+        </main>
+    )
 }
