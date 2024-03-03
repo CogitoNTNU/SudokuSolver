@@ -1,8 +1,8 @@
 import numpy as np
-from PIL import Image
+import cv2
 
 
-def getImageSection(img: Image.Image, x: int, y: int, x_sections: int, y_sections: int) -> Image.Image:
+def getImageSection(img: np.ndarray, x: int, y: int, x_sections: int, y_sections: int) -> np.ndarray:
     """
     TODO
     Funksjonen skal returnere en seksjon av img.
@@ -12,17 +12,13 @@ def getImageSection(img: Image.Image, x: int, y: int, x_sections: int, y_section
     """
 
 
-def getTransformedImageSection(img: Image.Image, points: list[list[int]], width: int, height: int) -> Image.Image:
-    """
-    TODO
-    Tanken bak denne funksjonen er at den skal ta inn et bilde som inneholder en sudoku,
-    muligens rotert, og returnere et kvadrat av denne sudokuen.
-    points skal være en liste med fire punkt, ett punkt for hvert hjørne i sudokuen.
-    width og height er størrelsen på bildet som returneres.
-    """
+def getTransformedImageSection(img: np.ndarray, points: list[list[int]], width: int, height: int) -> np.ndarray:
+    output_points = np.array([[0, 0], [width, 0], [width, height], [0, width]], dtype=np.float32)
+    transformation_matrix = cv2.getPerspectiveTransform(points, output_points)
+    return cv2.warpPerspective(img, transformation_matrix, (width, height))
 
 
-def drawSudokuSolution(img: Image.Image, points: list[list[int]], sudoku: np.ndarray) -> Image.Image:
+def drawSudokuSolution(img: np.ndarray, points: list[list[int]], sudoku: np.ndarray) -> np.ndarray:
     """
     TODO
     Funksjonen skal returnere et bilde der løsningen av sudokuen har blitt tegnet på bildet.
