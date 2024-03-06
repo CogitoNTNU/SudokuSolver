@@ -20,12 +20,13 @@ Bruk sudoku_recognizer til å finne hjørnepunktene til sudokuen.
 
 corner_points = np.array([[1110, 710], [1935, 1620], [1740, 3115], [600, 3140]], dtype=np.float32)
 img = getTransformedImageSection(img, corner_points, 700, 700)
+img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) #Gray scaling image
 
 sudoku = np.zeros((9, 9), dtype=int)
 
 for y in range(9):
     for x in range(9):
-        tile = getImageSection(img, x, y, 9, 9)
+        # tile = getImageSection(img, x, y, 9, 9)
 
         """
         TODO

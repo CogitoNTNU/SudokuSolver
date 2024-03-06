@@ -63,13 +63,12 @@ def findSudokuCorners(img: cv2.typing.MatLike) -> Optional[list[list[int]]]:
 
 
 def getImageSection(img: np.ndarray, x: int, y: int, x_sections: int, y_sections: int) -> np.ndarray:
-    """
-    TODO
-    Funksjonen skal returnere en seksjon av img.
-    x_sections er antall seksjoner i x-retning på bildet.
-    y_sections er antall seksjoner i y-retning på bildet.
-    x og y er hvilken seksjon som skal returneres.
-    """
+    height, width = img.shape
+    height //= y_sections
+    width //= x_sections
+    section = img[y*height:y*height+height, x*width:x*width+width]
+    return section
+
 
 
 def getTransformedImageSection(img: np.ndarray, points: list[list[int]], width: int, height: int) -> np.ndarray:
