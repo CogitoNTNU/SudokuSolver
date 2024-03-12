@@ -30,3 +30,5 @@ model.add(tf.keras.layer.Dense(10, activation="softmax")) #represent each digit
 model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics = ["accurancy"])
 
 model.fit(x_train, y_train) #train model 
+
+#https://pyimagesearch.com/2020/08/10/opencv-sudoku-solver-and-ocr/
