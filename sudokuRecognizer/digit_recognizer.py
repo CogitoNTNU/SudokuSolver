@@ -10,8 +10,8 @@ import os  # interacting w the os
 import matplotlib.pyplot as plt  # for visualization
 
 def save_model(model) -> None:
-    filename = "sudokuRecognizer/models/" + datetime.now().strftime("%d.%m.%y-%H:%M:%S")
-    model.save(filename, save_format="h5")
+    filename = "sudokuRecognizer/models/" + datetime.now().strftime("%d.%m.%y-%H:%M:%S") + ".keras"
+    model.save(filename)
 
 
 # Modified National Institute of Standards and Technology database
@@ -38,7 +38,7 @@ model = Sequential([
 model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
 
 # Fit model
-model.fit(x_train, y_train, validation_data=(x_test, y_test), batch_size=1000, epochs=1, verbose=1)  # train model
+model.fit(x_train, y_train, validation_data=(x_test, y_test), batch_size=20, epochs=50, verbose=1)  # train model
 
 image = cv.imread("sudokuRecognizer/test.png")
 image = cv.cvtColor(image, cv.COLOR_RGB2GRAY)
