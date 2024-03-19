@@ -1,33 +1,58 @@
 import tensorflow as tf  # ML part
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten
+from tensorflow.keras.datasets import mnist
+from sklearn.preprocessing import LabelBinarizer
+from datetime import datetime
 import numpy as np  # for numpy arrays
 import cv2 as cv  # computer vision to load and process images
 import os  # interacting w the os
 import matplotlib.pyplot as plt  # for visualization
-import certifi
-import ssl
-ssl_context = ssl.create_default_context(cafile=certifi.where())
+
+def save_model(model) -> None:
+    filename = "sudokuRecognizer/models/" + datetime.now().strftime("%d.%m.%y-%H:%M:%S")
+    model.save(filename, save_format="h5")
 
 
 # Modified National Institute of Standards and Technology database
-mnist = tf.keras.datasets.mnist
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
-# normalizing
+# Turn labels into vectors
+le = LabelBinarizer()
+y_train = le.fit_transform(y_train)
+y_test = le.transform(y_test)
 
+# normalizing
 x_train = tf.keras.utils.normalize(x_train, axis=1)
 x_test = tf.keras.utils.normalize(x_test, axis=1)
 
+# Define model
+model = Sequential([
+    Flatten(input_shape=(28, 28)),
+    Dense(128, activation="relu"),
+    Dense(128, activation="relu"),
+    Dense(10, activation="softmax")
+])
 
-model = tf.keras.models.Sequential()
-model.add(tf.keras.layers.Flatten(input_shape=(28, 28)))
-model.add(tf.keras.layer.Dense(128, activation="relu"))  # basic NN, activation
-model.add(tf.keras.layer.Dense(128, activation="relu"))
-# represent each digit
-model.add(tf.keras.layer.Dense(10, activation="softmax"))
+# Compile model
+model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
 
-model.compile(optimizer="adam",
-              loss="sparse_categorical_crossentropy", metrics=["accurancy"])
+# Fit model
+model.fit(x_train, y_train, validation_data=(x_test, y_test), batch_size=1000, epochs=1, verbose=1)  # train model
 
-model.fit(x_train, y_train)  # train model
+image = cv.imread("sudokuRecognizer/test.png")
+image = cv.cvtColor(image, cv.COLOR_RGB2GRAY)
+image = cv.resize(image, (28, 28))
+image = image / 255.0  # Normalize the image
+image = np.expand_dims(image, axis=0)
 
-# https://pyimagesearch.com/2020/08/10/opencv-sudoku-solver-and-ocr/
+prediction = model.predict(image)
+print(prediction)
+
+# Predict the class of the new image
+predictions = model.predict(image)
+predicted_class = np.argmax(predictions, axis=1)
+
+print(predicted_class)
+
+save_model(model)
