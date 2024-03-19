@@ -4,9 +4,11 @@ import cv2
 from pathlib import Path
 from imageUtil import getImageSection, getTransformedImageSection
 from solver import solve
+from sudokuRecognizer.numberRecognizer import NumberRecognizer
 
 sudoku_recognizer = ... # Load sudoku recognizer model
-number_recognizer = ... # Load number recognizer model
+number_recognizer = NumberRecognizer()
+number_recognizer.load("TODO") # filnavn her
 
 img_path = Path(__file__).parent / "img/skewed.png"
 img = cv2.imread(str(img_path))
