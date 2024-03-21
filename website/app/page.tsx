@@ -1,9 +1,10 @@
 "use client"
 import {useRef} from "react"
-
 import CameraFeed from "./components/Camera/CameraFeed"
 import CameraButton from "./components/Camera/CameraButton"
 import CameraSnap from "./components/Camera/CameraSnap"
+
+import { getCorners } from "./imageUtil"
 
 import styles from "./page.module.scss" 
 
@@ -16,6 +17,7 @@ export default function Home() {
             <CameraFeed videoRef={videoRef}/>
             <CameraButton videoRef={videoRef} photoRef={photoRef} />
             <CameraSnap photoRef={photoRef}/>
+            <button onClick={() => getCorners(photoRef)}>test</button>
         </main>
     )
 }
