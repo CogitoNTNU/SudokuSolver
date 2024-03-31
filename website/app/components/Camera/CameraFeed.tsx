@@ -1,7 +1,7 @@
 "use client"
-import { useEffect } from "react"
-
 import styles from "./CameraFeed.module.scss"
+import { useEffect, useState, useRef, useCallback } from "react"
+
 
 interface CameraFeedProps {
     videoRef: React.RefObject<HTMLVideoElement>,
@@ -9,56 +9,81 @@ interface CameraFeedProps {
 }
 
 export default function CameraFeed(props: CameraFeedProps) {
-    let stream: MediaStream | null = null
-    let animationFrame: number | null = null
+    const streamRef = useRef<MediaStream | null>(null)
+    const animationFrameRef = useRef<number | null>(null)
+
+    const [cameraActive, setCameraActive] = useState(false)
+
+    const handleVideoPlay = useCallback(() => {
+        const callbackWrapper = () => {
+            if (props.callbackFunction) {
+                props.callbackFunction()
+                animationFrameRef.current = requestAnimationFrame(callbackWrapper)
+            }
+        }
+        callbackWrapper()
+    }, [])
+
 
     async function getVideo() {
         try {
-            stream = await navigator.mediaDevices.getUserMedia({
+            streamRef.current = await navigator.mediaDevices.getUserMedia({
                 video: { width: 600, height: 600 }
             })
             const video = props.videoRef.current
             if (!video) {
-                console.log("video not defined")
+                console.error("video is undefined")
                 return
             }
-            video.srcObject = stream
+            video.srcObject = streamRef.current
             video.play()
-
-            video.addEventListener("play", () => {
-                const callbackWrapper = () => {
-                    if (props.callbackFunction) {
-                        props.callbackFunction()
-                        requestAnimationFrame(callbackWrapper)
-                    }
-                }
-                callbackWrapper()
-            })
-
+            video.addEventListener("play", handleVideoPlay)
         }
         catch (error)  {
             console.error(error)
         }
     }
+
+
+    function cleanUp() {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => {
+                track.stop()
+            })
+        }
+        if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current)
+            animationFrameRef.current = null
+        }
+        if (props.videoRef.current) {
+            props.videoRef.current.removeEventListener("play", handleVideoPlay)
+        }
+
+    }
     
 
     useEffect(() => {
-        getVideo()
-        return () => {
-            if (stream) {
-                stream.getTracks().forEach(track => {
-                    track.stop()
-                })
-            }
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame)
-            }
-        }
-    }, [props.videoRef])
+        return cleanUp
+    }, [])
 
     return (
         <div>
             <video className={styles.cameraFeed} ref={props.videoRef}></video>
+            {
+                cameraActive
+                ?
+                    <button onClick={() => {
+                        setCameraActive(false)
+                        cleanUp()
+                    }}
+                    >Stop Camera</button>
+                :
+                    <button onClick={() => {
+                        setCameraActive(true)
+                        getVideo()
+                    }}
+                    >Start Camera</button>
+            }
         </div>
     )
 }

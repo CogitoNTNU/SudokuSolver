@@ -14,7 +14,7 @@ export default function Home() {
     return (
         <main className={styles.main}>
             <CameraFeed videoRef={videoRef} callbackFunction={drawVideoOnCanvas.bind(null, videoRef, photoRef)}/>
-            <CameraButton videoRef={videoRef} photoRef={photoRef} />
+            {/* <CameraButton videoRef={videoRef} photoRef={photoRef} /> */}
             <CameraSnap photoRef={photoRef}/>
             <button onClick={() => getCorners(photoRef)}>test</button>
         </main>

@@ -70,8 +70,6 @@ export function getCorners(photoRef: MutableRefObject<HTMLCanvasElement | null>)
         approx.delete()
     }
     
-    console.log(biggestContour)
-
     cv.imshow(photo, img)
 
     img.delete()
