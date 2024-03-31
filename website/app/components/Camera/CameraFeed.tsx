@@ -4,32 +4,56 @@ import { useEffect } from "react"
 import styles from "./CameraFeed.module.scss"
 
 interface CameraFeedProps {
-    videoRef: React.RefObject<HTMLVideoElement>
+    videoRef: React.RefObject<HTMLVideoElement>,
+    callbackFunction?: () => void
 }
 
 export default function CameraFeed(props: CameraFeedProps) {
+    let stream: MediaStream | null = null
+    let animationFrame: number | null = null
 
-    function getVideo() {
-        navigator.mediaDevices.getUserMedia({
-            video: { width: 600, height: 600 }
-        })
-        .then(stream => {
-            let video = props.videoRef.current
+    async function getVideo() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { width: 600, height: 600 }
+            })
+            const video = props.videoRef.current
             if (!video) {
                 console.log("video not defined")
                 return
             }
             video.srcObject = stream
             video.play()
-        })
-        .catch(error => {
+
+            video.addEventListener("play", () => {
+                const callbackWrapper = () => {
+                    if (props.callbackFunction) {
+                        props.callbackFunction()
+                        requestAnimationFrame(callbackWrapper)
+                    }
+                }
+                callbackWrapper()
+            })
+
+        }
+        catch (error)  {
             console.error(error)
-        })
+        }
     }
     
 
     useEffect(() => {
         getVideo()
+        return () => {
+            if (stream) {
+                stream.getTracks().forEach(track => {
+                    track.stop()
+                })
+            }
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame)
+            }
+        }
     }, [props.videoRef])
 
     return (

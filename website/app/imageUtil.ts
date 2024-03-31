@@ -1,6 +1,25 @@
 "use client"
-import cv from "@techstark/opencv-js";
-import { MutableRefObject } from 'react';
+import cv from "@techstark/opencv-js"
+import { MutableRefObject } from 'react'
+
+export function drawVideoOnCanvas(videoRef: MutableRefObject<HTMLVideoElement | null>, canvasRef: MutableRefObject<HTMLCanvasElement | null>) {
+    if (!videoRef.current) {
+        console.error("videoRef.current is null")
+        return null
+    }
+    if (!canvasRef.current) {
+        console.error("canvasRef.current is null")
+        return null
+    }
+    const ctx = canvasRef.current.getContext("2d")
+    if (!ctx) {
+        console.error("Could not get 2d context from canvas")
+        return null
+    }
+    const video = videoRef.current
+    ctx.drawImage(video, 0, 0, canvasRef.current.width, canvasRef.current.height);
+    getCorners(canvasRef)
+  }
 
 export function getCorners(photoRef: MutableRefObject<HTMLCanvasElement | null>): number[][] | null {
     const photo = photoRef.current
@@ -48,12 +67,16 @@ export function getCorners(photoRef: MutableRefObject<HTMLCanvasElement | null>)
             biggestContour = approx
             biggestArea = area
         }
+        approx.delete()
     }
+    
+    console.log(biggestContour)
 
     cv.imshow(photo, img)
-    img.delete()
 
-    console.log(biggestContour)
+    img.delete()
+    contours.delete()
+    hierarchy.delete()
 
     // Return None if nothing was found
     if (biggestContour == undefined) {
