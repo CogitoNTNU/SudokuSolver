@@ -2,20 +2,20 @@ import { useEffect } from "react"
 import styles from "./CameraSnap.module.scss"
 
 interface CameraSnapProps {
-    photoRef: React.RefObject<HTMLCanvasElement>
+    canvasRef: React.RefObject<HTMLCanvasElement>
 }
 
 export default function CameraSnap(props: CameraSnapProps) {
     useEffect(() => {
-        if (props.photoRef.current) {
-            props.photoRef.current.width = 600
-            props.photoRef.current.height = 600
+        if (props.canvasRef.current) {
+            props.canvasRef.current.width = 300
+            props.canvasRef.current.height = 300
         }
-    }, [props.photoRef])
+    }, [props.canvasRef])
 
     return (
         <div>
-            <canvas className={styles.snap} ref={props.photoRef}></canvas>
+            <canvas className={styles.snap} ref={props.canvasRef}></canvas>
         </div>
     )
 }

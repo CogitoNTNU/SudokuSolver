@@ -2,7 +2,7 @@
 import cv from "@techstark/opencv-js"
 import { MutableRefObject } from 'react'
 
-export function drawVideoOnCanvas(videoRef: MutableRefObject<HTMLVideoElement | null>, canvasRef: MutableRefObject<HTMLCanvasElement | null>) {
+export function drawVideoOnCanvas(videoRef: MutableRefObject<HTMLVideoElement | null>, canvasRef: MutableRefObject<HTMLCanvasElement | null>, transformedCanvasRef: MutableRefObject<HTMLCanvasElement | null>) {
     if (!videoRef.current) {
         console.error("videoRef.current is null")
         return null
@@ -19,10 +19,15 @@ export function drawVideoOnCanvas(videoRef: MutableRefObject<HTMLVideoElement | 
     const video = videoRef.current
     ctx.drawImage(video, 0, 0, canvasRef.current.width, canvasRef.current.height);
     getCorners(canvasRef)
+    if (!transformedCanvasRef.current) {
+        return null
+    }
+    const points = [100, 100, 200, 100, 300, 200, 100, 200]
+    transformCanvasSection(canvasRef.current, transformedCanvasRef.current, points)
   }
 
-export function getCorners(photoRef: MutableRefObject<HTMLCanvasElement | null>): number[][] | null {
-    const photo = photoRef.current
+export function getCorners(canvasRef: MutableRefObject<HTMLCanvasElement | null>): number[][] | null {
+    const photo = canvasRef.current
     if (!photo) return null
 
     const img = cv.imread(photo)
@@ -85,4 +90,14 @@ export function getCorners(photoRef: MutableRefObject<HTMLCanvasElement | null>)
     // return [points[i:i + 2] for i in range(0, len(points), 2)]
 
     return null
+}
+
+export function transformCanvasSection(inputCanvas: HTMLCanvasElement, outputCanvas: HTMLCanvasElement, points: number[]) {
+    const inputMat = cv.matFromArray(4, 1, cv.CV_32FC2, points)
+    const outputMat = cv.matFromArray(4, 1, cv.CV_32FC2, [0, 0, outputCanvas.width-1, 0, outputCanvas.width-1, outputCanvas.height-1, 0, outputCanvas.width-1])
+    const transformationMatrix = cv.getPerspectiveTransform(inputMat, outputMat)
+    const inputImg = cv.imread(inputCanvas)
+    const outputImg = cv.imread(outputCanvas)
+    cv.warpPerspective(inputImg, outputImg, transformationMatrix, new cv.Size(outputCanvas.width, outputCanvas.height))
+    cv.imshow(outputCanvas, outputImg)
 }

@@ -28,7 +28,7 @@ export default function CameraFeed(props: CameraFeedProps) {
     async function getVideo() {
         try {
             streamRef.current = await navigator.mediaDevices.getUserMedia({
-                video: { width: 600, height: 600 }
+                video: { width: 300, height: 300 }
             })
             const video = props.videoRef.current
             if (!video) {
@@ -67,7 +67,7 @@ export default function CameraFeed(props: CameraFeedProps) {
     }, [])
 
     return (
-        <div>
+        <div className={styles.wrapper}>
             <video className={styles.cameraFeed} ref={props.videoRef}></video>
             {
                 cameraActive
