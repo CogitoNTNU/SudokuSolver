@@ -2,7 +2,9 @@
 import styles from "./page.module.scss" 
 import {useRef} from "react"
 import CameraFeed from "./components/Camera/CameraFeed"
+import { CameraFeedRef } from "./components/Camera/CameraFeedTypes"
 import CameraSnap from "./components/Camera/CameraSnap"
+import CameraButton from "./components/Camera/CameraButton"
 
 import { drawVideoOnCanvas } from "./imageUtil"
 
@@ -13,12 +15,15 @@ export default function Home() {
     const solutionCanvasRef = useRef<HTMLCanvasElement | null>(null)
     const transformedSolutionCanvasRef = useRef<HTMLCanvasElement | null>(null)
 
+    const cameraFeedRef = useRef<CameraFeedRef | null>(null)
+
     return (
         <>
         <main className={styles.main}>
             <div className={styles.cameraContainer}>
             </div>
-            <CameraFeed videoRef={videoRef} callbackFunction={drawVideoOnCanvas.bind(null, videoRef, canvasRef, transformedCanvasRef, solutionCanvasRef, transformedSolutionCanvasRef)}/>
+            <CameraFeed ref={cameraFeedRef} videoRef={videoRef} callbackFunction={drawVideoOnCanvas.bind(null, videoRef, canvasRef, transformedCanvasRef, solutionCanvasRef, transformedSolutionCanvasRef)}/>
+            <CameraButton cameraFeedRef={cameraFeedRef}/>
             <CameraSnap canvasRef={canvasRef}/>
             <canvas className={styles.invert} width={300} height={300} ref={transformedCanvasRef}></canvas>
         </main>

@@ -1,18 +1,13 @@
 "use client"
 import styles from "./CameraFeed.module.scss"
-import { useEffect, useState, useRef, useCallback } from "react"
+import { useEffect, useState, useRef, useCallback, forwardRef, useImperativeHandle } from "react"
+import { CameraFeedProps, CameraFeedRef } from "./CameraFeedTypes"
 
 
-interface CameraFeedProps {
-    videoRef: React.RefObject<HTMLVideoElement>,
-    callbackFunction?: () => void
-}
-
-export default function CameraFeed(props: CameraFeedProps) {
+const CameraFeed = forwardRef<CameraFeedRef, CameraFeedProps>((props: CameraFeedProps, ref) => {
     const streamRef = useRef<MediaStream | null>(null)
     const animationFrameRef = useRef<number | null>(null)
 
-    const [cameraActive, setCameraActive] = useState(false)
 
     const handleVideoPlay = useCallback(() => {
         const callbackWrapper = () => {
@@ -25,7 +20,7 @@ export default function CameraFeed(props: CameraFeedProps) {
     }, [])
 
 
-    async function getVideo() {
+    const start = useCallback( async () => {
         try {
             streamRef.current = await navigator.mediaDevices.getUserMedia({
                 video: { width: 300, height: 300 }
@@ -42,10 +37,10 @@ export default function CameraFeed(props: CameraFeedProps) {
         catch (error)  {
             console.error(error)
         }
-    }
+    }, [])
 
 
-    function cleanUp() {
+    const stop = useCallback(() => {
         if (streamRef.current) {
             streamRef.current.getTracks().forEach(track => {
                 track.stop()
@@ -59,31 +54,27 @@ export default function CameraFeed(props: CameraFeedProps) {
             props.videoRef.current.removeEventListener("play", handleVideoPlay)
         }
 
-    }
-    
-
-    useEffect(() => {
-        return cleanUp
     }, [])
 
+
+    useImperativeHandle(ref, () => {
+        return {
+            start,
+            stop
+        }
+    })
+
+
+    useEffect(() => {
+        return stop
+    }, [])
+
+    
     return (
         <div className={styles.wrapper}>
             <video className={styles.cameraFeed} ref={props.videoRef}></video>
-            {
-                cameraActive
-                ?
-                    <button onClick={() => {
-                        setCameraActive(false)
-                        cleanUp()
-                    }}
-                    >Stop Camera</button>
-                :
-                    <button onClick={() => {
-                        setCameraActive(true)
-                        getVideo()
-                    }}
-                    >Start Camera</button>
-            }
         </div>
     )
-}
+})
+
+export default CameraFeed

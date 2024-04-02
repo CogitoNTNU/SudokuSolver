@@ -1,42 +1,31 @@
-
 import styles from "./CameraButton.module.scss"
+import { useState, RefObject } from "react"
+import { CameraFeedRef } from "./CameraFeedTypes"
 
 interface CameraButtonProps {
-    videoRef: React.RefObject<HTMLVideoElement> 
-    photoRef: React.RefObject<HTMLCanvasElement>
+    cameraFeedRef: RefObject<CameraFeedRef>
 }
 
 export default function CameraButton(props: CameraButtonProps) {
-
-    function takePhoto() {
-        const width = 600
-        const height = 600
-
-        let video = props.videoRef.current
-        let photo = props.photoRef.current
-
-        if (!video) {
-            console.log("video not defined")
-            return
-        }
-        if (!photo) {
-            console.log("photo not defined")
-            return
-        }
-        photo.width = width
-        photo.height = height
-
-        let ctx = photo.getContext("2d")
-        if (!ctx) {
-            console.log("Could not get ctx")
-            return
-        }
-        ctx.drawImage(video, 0, 0, width, height)
-    }
+    const [cameraActive, setCameraActive] = useState(false)
 
     return (
-        <div>
-            <button className={styles.snapButton} onClick={takePhoto}>Take photo</button>
-        </div>
+        <>
+        {
+            cameraActive
+            ?
+            <button onClick={() => {
+                setCameraActive(false)
+                props.cameraFeedRef.current?.stop()
+            }}
+            >Stop Camera</button>
+            :
+            <button onClick={() => {
+                setCameraActive(true)
+                props.cameraFeedRef.current?.start()
+            }}
+            >Start Camera</button>
+        }
+        </>
     )
 }
