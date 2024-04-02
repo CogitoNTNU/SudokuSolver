@@ -1,10 +1,10 @@
 "use client"
 import styles from "./CameraFeed.module.scss"
-import { useEffect, useState, useRef, useCallback, forwardRef, useImperativeHandle } from "react"
+import { useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from "react"
 import { CameraFeedProps, CameraFeedRef } from "./CameraFeedTypes"
 
 
-const CameraFeed = forwardRef<CameraFeedRef, CameraFeedProps>((props: CameraFeedProps, ref) => {
+const CameraFeed = forwardRef<CameraFeedRef, CameraFeedProps>((props, ref) => {
     const streamRef = useRef<MediaStream | null>(null)
     const animationFrameRef = useRef<number | null>(null)
 
@@ -20,7 +20,7 @@ const CameraFeed = forwardRef<CameraFeedRef, CameraFeedProps>((props: CameraFeed
     }, [])
 
 
-    const start = useCallback( async () => {
+    const start = useCallback(async () => {
         try {
             streamRef.current = await navigator.mediaDevices.getUserMedia({
                 video: { width: 300, height: 300 }
@@ -69,11 +69,9 @@ const CameraFeed = forwardRef<CameraFeedRef, CameraFeedProps>((props: CameraFeed
         return stop
     }, [])
 
-    
+
     return (
-        <div className={styles.wrapper}>
-            <video className={styles.cameraFeed} ref={props.videoRef}></video>
-        </div>
+        <video className={styles.cameraFeed} ref={props.videoRef}></video>
     )
 })
 

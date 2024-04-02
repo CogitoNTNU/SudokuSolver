@@ -20,15 +20,17 @@ export default function Home() {
     return (
         <>
         <main className={styles.main}>
-            <div className={styles.cameraContainer}>
+            <div className={styles.camera}>
+                <div className={styles.cameraFeedContainer}>
+                    <CameraFeed ref={cameraFeedRef} videoRef={videoRef} callbackFunction={drawVideoOnCanvas.bind(null, videoRef, canvasRef, transformedCanvasRef, solutionCanvasRef, transformedSolutionCanvasRef)}/>
+                    <canvas className={styles.overlay} width={300} height={300} ref={transformedSolutionCanvasRef}></canvas>
+                </div>
+                <CameraButton cameraFeedRef={cameraFeedRef}/>
             </div>
-            <CameraFeed ref={cameraFeedRef} videoRef={videoRef} callbackFunction={drawVideoOnCanvas.bind(null, videoRef, canvasRef, transformedCanvasRef, solutionCanvasRef, transformedSolutionCanvasRef)}/>
-            <CameraButton cameraFeedRef={cameraFeedRef}/>
             <CameraSnap canvasRef={canvasRef}/>
             <canvas className={styles.invert} width={300} height={300} ref={transformedCanvasRef}></canvas>
         </main>
         <canvas width={300} height={300} ref={solutionCanvasRef}></canvas>
-        <canvas width={300} height={300} ref={transformedSolutionCanvasRef}></canvas>
         </>
     )
 }
