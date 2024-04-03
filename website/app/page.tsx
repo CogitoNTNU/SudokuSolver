@@ -3,7 +3,6 @@ import styles from "./page.module.scss"
 import {useRef} from "react"
 import CameraFeed from "./components/Camera/CameraFeed"
 import { CameraFeedRef } from "./components/Camera/CameraFeedTypes"
-import CameraSnap from "./components/Camera/CameraSnap"
 import CameraButton from "./components/Camera/CameraButton"
 
 import { drawVideoOnCanvas } from "./imageUtil"
@@ -27,8 +26,8 @@ export default function Home() {
                 </div>
                 <CameraButton cameraFeedRef={cameraFeedRef}/>
             </div>
-            <CameraSnap canvasRef={canvasRef}/>
-            <canvas className={styles.invert} width={300} height={300} ref={transformedCanvasRef}></canvas>
+            <canvas width={300} height={300} ref={canvasRef}></canvas>
+            <canvas width={300} height={300} ref={transformedCanvasRef}></canvas>
         </main>
         <canvas width={300} height={300} ref={solutionCanvasRef}></canvas>
         </>
