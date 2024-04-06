@@ -1,10 +1,10 @@
 "use client"
 import styles from "./CameraFeed.module.scss"
-import { useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from "react"
-import { CameraFeedProps, CameraFeedRef } from "./CameraFeedTypes"
+import { useEffect, useRef, useCallback } from "react"
+import { CameraFeedProps, CameraState } from "./Types"
 
 
-const CameraFeed = forwardRef<CameraFeedRef, CameraFeedProps>((props, ref) => {
+export default function CameraFeed(props: CameraFeedProps) {
     const streamRef = useRef<MediaStream | null>(null)
     const animationFrameRef = useRef<number | null>(null)
 
@@ -17,6 +17,8 @@ const CameraFeed = forwardRef<CameraFeedRef, CameraFeedProps>((props, ref) => {
             }
         }
         callbackWrapper()
+        props.setCameraState(CameraState.On)
+        console.log("Should be started")
     }, [])
 
 
@@ -31,7 +33,10 @@ const CameraFeed = forwardRef<CameraFeedRef, CameraFeedProps>((props, ref) => {
                 return
             }
             video.srcObject = streamRef.current
-            video.play()
+            video.play().catch(error => {
+                console.log(error)
+            })
+            props.setCameraState(CameraState.On)
             video.addEventListener("play", handleVideoPlay)
         }
         catch (error)  {
@@ -57,22 +62,22 @@ const CameraFeed = forwardRef<CameraFeedRef, CameraFeedProps>((props, ref) => {
     }, [])
 
 
-    useImperativeHandle(ref, () => {
-        return {
-            start,
-            stop
-        }
-    })
-
-
     useEffect(() => {
-        return stop
-    }, [])
+        console.log(props.cameraState)
+        switch (props.cameraState) {
+            case CameraState.Pending:
+                start()
+                break
+            case CameraState.Off:
+                stop()
+                break
+            case CameraState.On:
+                return stop
+        }
+    }, [props.cameraState])
 
 
     return (
         <video className={styles.cameraFeed} ref={props.videoRef}></video>
     )
-})
-
-export default CameraFeed
+}

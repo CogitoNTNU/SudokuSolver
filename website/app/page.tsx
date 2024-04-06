@@ -1,11 +1,11 @@
 "use client"
 import styles from "./page.module.scss" 
-import {useRef} from "react"
+import { useRef, useState } from "react"
 import CameraFeed from "./components/Camera/CameraFeed"
-import { CameraFeedRef } from "./components/Camera/CameraFeedTypes"
 import CameraButton from "./components/Camera/CameraButton"
-
-import { drawVideoOnCanvas } from "./imageUtil"
+import { SudokuApplicationContext } from "./context/sudokuApplication/SudokuApplication"
+import { CameraState } from "./components/Camera/Types" 
+import { drawVideoOnCanvas } from "./util/image"
 
 export default function Home() {
     const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -14,22 +14,28 @@ export default function Home() {
     const solutionCanvasRef = useRef<HTMLCanvasElement | null>(null)
     const transformedSolutionCanvasRef = useRef<HTMLCanvasElement | null>(null)
 
-    const cameraFeedRef = useRef<CameraFeedRef | null>(null)
+    const [cameraState, setCameraState] = useState<CameraState>(CameraState.Off)
+
+    const application = {
+        cameraState,
+        setCameraState
+    }
 
     return (
-        <>
-        <main className={styles.main}>
-            <div className={styles.camera}>
-                <div className={styles.cameraFeedContainer}>
-                    <CameraFeed ref={cameraFeedRef} videoRef={videoRef} callbackFunction={drawVideoOnCanvas.bind(null, videoRef, canvasRef, transformedCanvasRef, solutionCanvasRef, transformedSolutionCanvasRef)}/>
-                    <canvas className={styles.overlay} width={300} height={300} ref={transformedSolutionCanvasRef}></canvas>
+        <SudokuApplicationContext.Provider value={application}>
+            <main className={styles.main}>
+                <div className={styles.camera}>
+                    <div className={styles.cameraFeedContainer}>
+                        <CameraFeed videoRef={videoRef} cameraState={cameraState} setCameraState={setCameraState} callbackFunction={drawVideoOnCanvas.bind(null, videoRef, canvasRef, transformedCanvasRef, solutionCanvasRef, transformedSolutionCanvasRef)}/>
+                        <canvas className={styles.overlay} width={300} height={300} ref={transformedSolutionCanvasRef}></canvas>
+                    </div>
+                    <CameraButton/>
                 </div>
-                <CameraButton cameraFeedRef={cameraFeedRef}/>
-            </div>
-            <canvas width={300} height={300} ref={canvasRef}></canvas>
-            <canvas width={300} height={300} ref={transformedCanvasRef}></canvas>
-        </main>
-        <canvas width={300} height={300} ref={solutionCanvasRef}></canvas>
-        </>
+                <canvas width={300} height={300} ref={canvasRef}></canvas>
+                <canvas width={300} height={300} ref={transformedCanvasRef}></canvas>
+            </main>
+            <canvas width={300} height={300} ref={solutionCanvasRef}></canvas>
+
+        </SudokuApplicationContext.Provider>
     )
 }

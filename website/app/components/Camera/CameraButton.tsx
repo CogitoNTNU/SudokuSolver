@@ -1,30 +1,29 @@
 import styles from "./CameraButton.module.scss"
-import { useState, RefObject } from "react"
-import { CameraFeedRef } from "./CameraFeedTypes"
+import { useSudokuApplicationContext } from "@/app/context/sudokuApplication/SudokuApplication"
+import { CameraState } from "./Types"
 
-interface CameraButtonProps {
-    cameraFeedRef: RefObject<CameraFeedRef>
-}
 
-export default function CameraButton(props: CameraButtonProps) {
-    const [cameraActive, setCameraActive] = useState(false)
+export default function CameraButton() {
+    const application = useSudokuApplicationContext()
 
     return (
         <>
         {
-            cameraActive
+            application.cameraState == CameraState.Off
             ?
             <button onClick={() => {
-                setCameraActive(false)
-                props.cameraFeedRef.current?.stop()
-            }}
-            >Stop Camera</button>
-            :
-            <button onClick={() => {
-                setCameraActive(true)
-                props.cameraFeedRef.current?.start()
+                application.setCameraState(CameraState.Pending)
+                console.log("Start")
             }}
             >Start Camera</button>
+            :
+            <button onClick={() => {
+                if (application.cameraState == CameraState.On) {
+                    application.setCameraState(CameraState.Off)
+                }
+                console.log("Stop")
+            }}
+            >Stop Camera</button>
         }
         </>
     )
