@@ -18,7 +18,6 @@ export default function CameraFeed(props: CameraFeedProps) {
         }
         callbackWrapper()
         props.setCameraState(CameraState.On)
-        console.log("Should be started")
     }, [])
 
 
@@ -33,10 +32,10 @@ export default function CameraFeed(props: CameraFeedProps) {
                 return
             }
             video.srcObject = streamRef.current
-            video.play().catch(error => {
-                console.log(error)
+            video.play().catch(() => {
+                props.setCameraState(CameraState.Off)
+                return
             })
-            props.setCameraState(CameraState.On)
             video.addEventListener("play", handleVideoPlay)
         }
         catch (error)  {
@@ -63,7 +62,6 @@ export default function CameraFeed(props: CameraFeedProps) {
 
 
     useEffect(() => {
-        console.log(props.cameraState)
         switch (props.cameraState) {
             case CameraState.Pending:
                 start()

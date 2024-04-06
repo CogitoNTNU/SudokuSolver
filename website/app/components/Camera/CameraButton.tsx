@@ -11,19 +11,17 @@ export default function CameraButton() {
         {
             application.cameraState == CameraState.Off
             ?
-            <button onClick={() => {
-                application.setCameraState(CameraState.Pending)
-                console.log("Start")
-            }}
-            >Start Camera</button>
+                <div className={`${styles.button} ${styles.inactive}`} onClick={() => {
+                    application.setCameraState(CameraState.Pending)
+                }}
+                >Start Camera</div>
             :
-            <button onClick={() => {
-                if (application.cameraState == CameraState.On) {
-                    application.setCameraState(CameraState.Off)
-                }
-                console.log("Stop")
-            }}
-            >Stop Camera</button>
+                <div className={`${styles.button} ${styles.active}`} onClick={() => {
+                    if (application.cameraState == CameraState.On) {
+                        application.setCameraState(CameraState.Off)
+                    }
+                }}
+                >Stop Camera</div>
         }
         </>
     )
