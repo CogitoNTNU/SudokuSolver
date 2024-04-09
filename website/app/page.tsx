@@ -4,7 +4,7 @@ import { useRef, useState } from "react"
 import CameraFeed from "./components/Camera/CameraFeed"
 import CameraButton from "./components/Camera/CameraButton"
 import { SudokuApplicationContext } from "./context/sudokuApplication/SudokuApplication"
-import { SudokuState } from "./context/sudokuApplication/Types"
+import { SudokuState } from "./context/sudokuApplication/types" // Fix: Change the import statement to match the actual file name
 import { CameraState } from "./components/Camera/Types" 
 import { drawVideoOnCanvas } from "./util/image"
 
