@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@techstark/opencv-js": "^4.9.0-release.3",
+    "@tensorflow/tfjs": "^4.17.0",
+    "@tensorflow/tfjs-node": "^4.17.0",
     "next": "14.0.4",
     "react": "^18",
     "react-dom": "^18"

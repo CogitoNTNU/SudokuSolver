@@ -1,5 +1,7 @@
 "use client"
 import cv from "@techstark/opencv-js"
+import tf from "@tensorflow/tfjs"
+import { NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE } from "../context/sudokuApplication/Types"
 import { MutableRefObject } from 'react'
 
 export function drawVideoOnCanvas(videoRef: MutableRefObject<HTMLVideoElement | null>, canvasRef: MutableRefObject<HTMLCanvasElement | null>, transformedCanvasRef: MutableRefObject<HTMLCanvasElement | null>, solutionCanvasRef: MutableRefObject<HTMLCanvasElement | null>, transformedSolutionCanvasRef: MutableRefObject<HTMLCanvasElement | null>) {
@@ -137,4 +139,26 @@ export function drawSolutionOnCanvas(solution: number[], canvas: HTMLCanvasEleme
             ctx.fillText(solution[i].toString(), size*(i%9) + size*0.2, size*(Math.floor(i/9)+1) -size*0.1)
         }
     }
+}
+
+export function sudokuImgToBatchImagesArray(img: cv.Mat): Float32Array {
+    const batchImagesArray = new Float32Array(SUDOKU_SIZE * NUMBER_IMAGE_SIZE)
+
+    const resizedImg = new cv.Mat()
+    cv.resize(img, resizedImg, new cv.Size(SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH, SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT))
+
+    cv.cvtColor(resizedImg, resizedImg, cv.COLOR_BGR2GRAY)
+    // cv.bitwise_not(resizedImg, resizedImg) 
+    
+    for (let y = 0; y < SUDOKU_HEIGHT; y++) {
+        for (let x = 0; x < SUDOKU_WIDTH; x++) {
+            const floatImg = new cv.Mat()
+            const rect = resizedImg.roi(new cv.Rect(x*NUMBER_IMAGE_WIDTH,y*NUMBER_IMAGE_HEIGHT,NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT))
+            rect.convertTo(floatImg, cv.CV_32F, 1 / 255)
+            batchImagesArray.set(floatImg.data32F, x*NUMBER_IMAGE_SIZE + y*NUMBER_IMAGE_SIZE*SUDOKU_WIDTH)
+        }
+    }
+    
+    resizedImg.delete()
+    return batchImagesArray
 }

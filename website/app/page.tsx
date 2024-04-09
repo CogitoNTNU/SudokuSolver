@@ -4,6 +4,7 @@ import { useRef, useState } from "react"
 import CameraFeed from "./components/Camera/CameraFeed"
 import CameraButton from "./components/Camera/CameraButton"
 import { SudokuApplicationContext } from "./context/sudokuApplication/SudokuApplication"
+import { SudokuState } from "./context/sudokuApplication/Types"
 import { CameraState } from "./components/Camera/Types" 
 import { drawVideoOnCanvas } from "./util/image"
 
@@ -15,10 +16,17 @@ export default function Home() {
     const transformedSolutionCanvasRef = useRef<HTMLCanvasElement | null>(null)
 
     const [cameraState, setCameraState] = useState<CameraState>(CameraState.Off)
+    const [sudokuState, setSudokuState] = useState<SudokuState>(SudokuState.NotFound)
+
+    // const model = loadLayersModel("model/model.json").then((model) =>
+    //     console.log(model)
+    // )
 
     const application = {
         cameraState,
-        setCameraState
+        setCameraState,
+        sudokuState,
+        setSudokuState
     }
 
     return (
