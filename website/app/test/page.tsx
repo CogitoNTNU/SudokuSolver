@@ -3,7 +3,7 @@ import styles from "./page.module.scss"
 import { useEffect, useState, useRef } from "react"
 import { loadLayersModel, LayersModel, tensor2d } from "@tensorflow/tfjs"
 import cv from "@techstark/opencv-js"
-import { NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_SIZE, SUDOKU_HEIGHT, SUDOKU_WIDTH, SUDOKU_SIZE } from "../context/sudokuApplication/Types"
+import { NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_SIZE, SUDOKU_HEIGHT, SUDOKU_WIDTH, SUDOKU_SIZE } from "../context/sudokuApplication/types"
 import { sudokuImgToBatchImagesArray } from "../util/image"
 
 
