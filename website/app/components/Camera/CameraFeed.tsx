@@ -24,11 +24,20 @@ export default function CameraFeed(props: CameraFeedProps) {
     const start = useCallback(async () => {
         try {
             streamRef.current = await navigator.mediaDevices.getUserMedia({
-                video: { width: 300, height: 300 }
+                video: { width: props.width, height: props.height }
+            }).catch((error: Error) => {
+                props.setCameraState(CameraState.Off)
+                if (error.name == "NotAllowedError") {
+                    alert("Programmet fungerer ikke uten at du gir tilgang til kameraet")
+                }
+                return null
             })
+            if (!streamRef.current) {
+                return
+            }
             const video = props.videoRef.current
             if (!video) {
-                console.error("video is undefined")
+                console.error("videoRef must be linked to a HTMLVideoElement")
                 return
             }
             video.srcObject = streamRef.current
