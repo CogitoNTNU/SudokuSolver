@@ -8,7 +8,6 @@ export default function CameraFeed(props: CameraFeedProps) {
     const streamRef = useRef<MediaStream | null>(null)
     const animationFrameRef = useRef<number | null>(null)
 
-
     const handleVideoPlay = useCallback(() => {
         const callbackWrapper = () => {
             if (props.callbackFunction) {
@@ -18,7 +17,7 @@ export default function CameraFeed(props: CameraFeedProps) {
         }
         callbackWrapper()
         props.setCameraState(CameraState.On)
-    }, [])
+    }, [props.callbackFunction])
 
 
     const start = useCallback(async () => {
@@ -27,9 +26,7 @@ export default function CameraFeed(props: CameraFeedProps) {
                 video: { width: props.width, height: props.height }
             }).catch((error: Error) => {
                 props.setCameraState(CameraState.Off)
-                if (error.name == "NotAllowedError") {
-                    alert("Programmet fungerer ikke uten at du gir tilgang til kameraet")
-                }
+                console.error(error)
                 return null
             })
             if (!streamRef.current) {
@@ -50,7 +47,7 @@ export default function CameraFeed(props: CameraFeedProps) {
         catch (error)  {
             console.error(error)
         }
-    }, [])
+    }, [props.callbackFunction])
 
 
     const stop = useCallback(() => {
@@ -82,6 +79,14 @@ export default function CameraFeed(props: CameraFeedProps) {
                 return stop
         }
     }, [props.cameraState])
+
+
+    useEffect(() => {
+        if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current)
+            handleVideoPlay()
+        }
+    }, [props.callbackFunction])
 
 
     return (
