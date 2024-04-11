@@ -6,7 +6,7 @@ export interface CameraFeedProps {
     height: number,
     cameraState: CameraState
     setCameraState: Dispatch<SetStateAction<CameraState>>
-    callbackFunction?: () => void
+    callbackFunction?: Function
 }
 
 export enum CameraState {

@@ -1,9 +1,10 @@
 "use client"
 import cv from "@techstark/opencv-js"
-import { NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE } from "../context/sudokuApplication/Types"
+import { tensor2d } from "@tensorflow/tfjs"
 import { MutableRefObject } from 'react'
+import { SudokuApplication, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE } from "../context/sudokuApplication/Types"
 
-export function drawVideoOnCanvas(videoRef: MutableRefObject<HTMLVideoElement | null>, canvasRef: MutableRefObject<HTMLCanvasElement | null>, transformedCanvasRef: MutableRefObject<HTMLCanvasElement | null>, solutionCanvasRef: MutableRefObject<HTMLCanvasElement | null>, transformedSolutionCanvasRef: MutableRefObject<HTMLCanvasElement | null>) {
+export function drawVideoOnCanvas(videoRef: MutableRefObject<HTMLVideoElement | null>, canvasRef: MutableRefObject<HTMLCanvasElement | null>, application: SudokuApplication, transformedCanvasRef: MutableRefObject<HTMLCanvasElement | null>, solutionCanvasRef: MutableRefObject<HTMLCanvasElement | null>, transformedSolutionCanvasRef: MutableRefObject<HTMLCanvasElement | null>) {
     if (!videoRef.current) {
         console.error("videoRef.current is null")
         return null
