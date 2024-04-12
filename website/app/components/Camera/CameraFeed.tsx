@@ -25,7 +25,11 @@ export default function CameraFeed(props: CameraFeedProps) {
     const start = useCallback(async () => {
         try {
             streamRef.current = await navigator.mediaDevices.getUserMedia({
-                video: { width: props.width, height: props.height }
+                video: {
+                    width: props.width, 
+                    height: props.height,
+                    facingMode: { exact: "environment" }
+                }
             }).catch((error: Error) => {
                 props.setCameraState(CameraState.Off)
                 console.error(error)
@@ -89,6 +93,6 @@ export default function CameraFeed(props: CameraFeedProps) {
 
 
     return (
-        <video className={styles.cameraFeed} ref={props.videoRef}></video>
+        <video className={styles.cameraFeed} ref={props.videoRef} playsInline></video>
     )
 }

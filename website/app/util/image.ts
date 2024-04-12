@@ -33,7 +33,23 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
         if (!Array.isArray(prediction)) {
         (async () => {
             const data = await prediction.data()
-            console.log(data)
+            for (let i = 0; i < SUDOKU_SIZE; i++) {
+                let bestGuess = 0
+                let bestProbabilty = 0
+                for (let j = 0; j < 10; j++) {
+                    const probabilty = data[i*10+j]
+                    if (probabilty > bestProbabilty) {
+                        bestGuess = j
+                        bestProbabilty = probabilty
+                    }
+                }
+                if (bestProbabilty > application.probability[i]) {
+                    application.sudoku[i] = bestGuess
+                    application.probability[i] = bestProbabilty
+                }
+                console.log(bestProbabilty)
+            }
+            drawSolutionOnCanvas(application.sudoku, solutionCanvas)
         })()
         }
 
@@ -42,14 +58,6 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
 
     img.delete()
 
-    const solution = []
-    
-    for (let i = 0; i < 81; i++) {
-        solution.push(i%9+1)
-    }
-
-
-    drawSolutionOnCanvas(solution, solutionCanvas)
 
     // if (sudokuCorners) {
     //     const solutionImg = cv.imread(solutionCanvas)
@@ -124,21 +132,20 @@ export function transformImgSection(src: cv.Mat, dst: cv.Mat, inputPoints: numbe
 }
 
 
-export function drawSolutionOnCanvas(solution: number[], canvas: HTMLCanvasElement) {
+export function drawSolutionOnCanvas(solution: Uint8Array, canvas: HTMLCanvasElement) {
     const ctx = canvas.getContext("2d")
     if (!ctx) {
         console.error("Could not get 2d context from canvas")
         return 
     }
 
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.0)'
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     const size = canvas.width / 9
     ctx.fillStyle = "black"
     ctx.font = `${size}px monospace`;
 
-    for (let i = 0; i < 81; i++) {
+    for (let i = 0; i < SUDOKU_SIZE; i++) {
         if (solution[i] != 0) {
             ctx.fillText(solution[i].toString(), size*(i%9) + size*0.2, size*(Math.floor(i/9)+1) -size*0.1)
         }
