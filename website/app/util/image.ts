@@ -33,7 +33,7 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
         if (!Array.isArray(prediction)) {
         (async () => {
             const data = await prediction.data()
-            // console.log(data)
+            console.log(data)
         })()
         }
 
