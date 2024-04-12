@@ -7,17 +7,19 @@ import { CameraFeedProps, CameraState } from "./Types"
 export default function CameraFeed(props: CameraFeedProps) {
     const streamRef = useRef<MediaStream | null>(null)
     const animationFrameRef = useRef<number | null>(null)
+    const callbackFunctionRef = useRef<Function | undefined>(props.callbackFunction)
 
+    
     const handleVideoPlay = useCallback(() => {
         const callbackWrapper = () => {
-            if (props.callbackFunction) {
-                props.callbackFunction()
+            if (callbackFunctionRef.current) {
+                callbackFunctionRef.current()
                 animationFrameRef.current = requestAnimationFrame(callbackWrapper)
             }
         }
         callbackWrapper()
         props.setCameraState(CameraState.On)
-    }, [props.callbackFunction])
+    }, [])
 
 
     const start = useCallback(async () => {
@@ -47,7 +49,7 @@ export default function CameraFeed(props: CameraFeedProps) {
         catch (error)  {
             console.error(error)
         }
-    }, [props.callbackFunction])
+    }, [])
 
 
     const stop = useCallback(() => {
@@ -82,10 +84,7 @@ export default function CameraFeed(props: CameraFeedProps) {
 
 
     useEffect(() => {
-        if (animationFrameRef.current) {
-            cancelAnimationFrame(animationFrameRef.current)
-            handleVideoPlay()
-        }
+        callbackFunctionRef.current = props.callbackFunction
     }, [props.callbackFunction])
 
 

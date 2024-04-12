@@ -32,18 +32,22 @@ export default function Home() {
         solution: new Uint8Array(SUDOKU_SIZE)
     }
     
-    const callbackFunction = useCallback(() => {
+
+    const callbackFunction = useCallback(model ? () => {
         drawVideoOnCanvas(videoRef, canvasRef, application, transformedCanvasRef, solutionCanvasRef, transformedSolutionCanvasRef)
-    }, [model])
+    } : () => {}, [model])
     
+
     const loadModel = useCallback(() => {
         loadLayersModel('/models/model/model.json').then(loadedModel => {
             setModel(loadedModel)
+            console.log("model loaded")
         })
         .catch((error: Error) => {
             console.error('Error loading model:', error)
         })
     }, [])
+
 
     useEffect(() => {
         loadModel()
