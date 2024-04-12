@@ -2,9 +2,10 @@
 import cv from "@techstark/opencv-js"
 import { tensor2d } from "@tensorflow/tfjs"
 import { SudokuApplication, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE } from "../context/sudokuApplication/Types"
+import { sortPointsRadially } from "./sort"
+
 
 export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasElement, application: SudokuApplication, transformedCanvas: HTMLCanvasElement, solutionCanvas: HTMLCanvasElement, transformedSolutionCanvas: HTMLCanvasElement) {
-
     const ctx = canvas.getContext("2d")
     if (!ctx) {
         throw new Error("Could not get context from canvas")
@@ -15,11 +16,27 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
     const sudokuCorners = getCorners(img, canvas)
 
     // Use detected corners if available
-    if (sudokuCorners) {
+    if (sudokuCorners && application.model) {
+        sortPointsRadially(sudokuCorners)
         const flatPoints = sudokuCorners.flat()
         const transformedImg = new cv.Mat()
-        transformImgSection(img, transformedImg, flatPoints, [0, 0, img.cols, 0, img.cols, img.rows, 0, img.rows])
+        transformImgSection(img, transformedImg, flatPoints, [0, 0, img.cols, 0, img.rows, img.cols, 0, img.rows])
         cv.imshow(transformedCanvas, transformedImg)
+
+        const batchImagesArray = sudokuImgToBatchImagesArray(img)
+
+        const batchImagesTensor = tensor2d(batchImagesArray, [SUDOKU_SIZE, NUMBER_IMAGE_SIZE])
+        const predictionData = batchImagesTensor.reshape([SUDOKU_SIZE, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, 1])
+        const prediction = application.model.predict(predictionData)
+        predictionData.dispose()
+
+        if (!Array.isArray(prediction)) {
+        (async () => {
+            const data = await prediction.data()
+            // console.log(data)
+        })()
+        }
+
         transformedImg.delete()
     }
 
@@ -31,17 +48,18 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
         solution.push(i%9+1)
     }
 
+
     drawSolutionOnCanvas(solution, solutionCanvas)
 
-    if (sudokuCorners) {
-        const solutionImg = cv.imread(solutionCanvas)
-        const transformedSolutionImg = new cv.Mat()
-        const solutionCorners = [0, 0, solutionImg.cols, 0, solutionImg.cols, solutionImg.rows, 0, solutionImg.rows] 
-        transformImgSection(solutionImg, transformedSolutionImg, solutionCorners, sudokuCorners.flat())
-        cv.imshow(transformedSolutionCanvas, transformedSolutionImg)
-        solutionImg.delete()
-        transformedSolutionImg.delete()
-    }
+    // if (sudokuCorners) {
+    //     const solutionImg = cv.imread(solutionCanvas)
+    //     const transformedSolutionImg = new cv.Mat()
+    //     const solutionCorners = [0, 0, solutionImg.cols, 0, solutionImg.cols, solutionImg.rows, 0, solutionImg.rows] 
+    //     transformImgSection(solutionImg, transformedSolutionImg, solutionCorners, sudokuCorners.flat())
+    //     cv.imshow(transformedSolutionCanvas, transformedSolutionImg)
+    //     solutionImg.delete()
+    //     transformedSolutionImg.delete()
+    // }
 
 }
 
