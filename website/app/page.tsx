@@ -34,7 +34,10 @@ export default function Home() {
     
 
     const callbackFunction = useCallback(model ? () => {
-        drawVideoOnCanvas(videoRef, canvasRef, application, transformedCanvasRef, solutionCanvasRef, transformedSolutionCanvasRef)
+        if (!videoRef.current || !canvasRef.current || !transformedCanvasRef.current || !solutionCanvasRef.current || !transformedSolutionCanvasRef.current) {
+            throw new Error("Ref is not set to a value")
+        }
+        drawVideoOnCanvas(videoRef.current, canvasRef.current, application, transformedCanvasRef.current, solutionCanvasRef.current, transformedSolutionCanvasRef.current)
     } : () => {}, [model])
     
 

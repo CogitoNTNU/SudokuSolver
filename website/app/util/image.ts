@@ -1,60 +1,46 @@
 "use client"
 import cv from "@techstark/opencv-js"
 import { tensor2d } from "@tensorflow/tfjs"
-import { MutableRefObject } from 'react'
 import { SudokuApplication, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE } from "../context/sudokuApplication/Types"
 
-export function drawVideoOnCanvas(videoRef: MutableRefObject<HTMLVideoElement | null>, canvasRef: MutableRefObject<HTMLCanvasElement | null>, application: SudokuApplication, transformedCanvasRef: MutableRefObject<HTMLCanvasElement | null>, solutionCanvasRef: MutableRefObject<HTMLCanvasElement | null>, transformedSolutionCanvasRef: MutableRefObject<HTMLCanvasElement | null>) {
-    if (!videoRef.current) {
-        console.error("videoRef.current is null")
-        return null
-    }
-    if (!canvasRef.current) {
-        console.error("canvasRef.current is null")
-        return null
-    }
-    const canvas = canvasRef.current
+export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasElement, application: SudokuApplication, transformedCanvas: HTMLCanvasElement, solutionCanvas: HTMLCanvasElement, transformedSolutionCanvas: HTMLCanvasElement) {
+
     const ctx = canvas.getContext("2d")
     if (!ctx) {
-        console.error("Could not get 2d context from canvas")
-        return null
+        throw new Error("Could not get context from canvas")
     }
-
-    const video = videoRef.current
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
     
     const img = cv.imread(canvas)
     const sudokuCorners = getCorners(img, canvas)
 
     // Use detected corners if available
-    if (sudokuCorners && transformedCanvasRef.current) {
+    if (sudokuCorners) {
         const flatPoints = sudokuCorners.flat()
         const transformedImg = new cv.Mat()
         transformImgSection(img, transformedImg, flatPoints, [0, 0, img.cols, 0, img.cols, img.rows, 0, img.rows])
-        cv.imshow(transformedCanvasRef.current, transformedImg)
+        cv.imshow(transformedCanvas, transformedImg)
         transformedImg.delete()
     }
 
     img.delete()
 
     const solution = []
-
     
-    if (solutionCanvasRef.current) {
-        for (let i = 0; i < 81; i++) {
-            solution.push(i%9+1)
-        }
-        drawSolutionOnCanvas(solution, solutionCanvasRef.current)
+    for (let i = 0; i < 81; i++) {
+        solution.push(i%9+1)
+    }
 
-        if (transformedSolutionCanvasRef.current && sudokuCorners) {
-            const solutionImg = cv.imread(solutionCanvasRef.current)
-            const transformedSolutionImg = new cv.Mat()
-            const solutionCorners = [0, 0, solutionImg.cols, 0, solutionImg.cols, solutionImg.rows, 0, solutionImg.rows] 
-            transformImgSection(solutionImg, transformedSolutionImg, solutionCorners, sudokuCorners.flat())
-            cv.imshow(transformedSolutionCanvasRef.current, transformedSolutionImg)
-            solutionImg.delete()
-            transformedSolutionImg.delete()
-        }
+    drawSolutionOnCanvas(solution, solutionCanvas)
+
+    if (sudokuCorners) {
+        const solutionImg = cv.imread(solutionCanvas)
+        const transformedSolutionImg = new cv.Mat()
+        const solutionCorners = [0, 0, solutionImg.cols, 0, solutionImg.cols, solutionImg.rows, 0, solutionImg.rows] 
+        transformImgSection(solutionImg, transformedSolutionImg, solutionCorners, sudokuCorners.flat())
+        cv.imshow(transformedSolutionCanvas, transformedSolutionImg)
+        solutionImg.delete()
+        transformedSolutionImg.delete()
     }
 
 }
