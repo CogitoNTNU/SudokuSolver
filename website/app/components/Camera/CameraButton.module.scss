@@ -1,15 +1,35 @@
-.button {
-    width: 80px;
-    height: 80px;
-    background-color: gray;
+.active {
+    width: 180px;
+    height: 180px;
+    background-color: rgb(9, 9, 130);
+    border-radius: 30px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    transition:  0.5s ease-out;
 
 }
 
 .inactive {
-    transition: border-radius 2s;
+    width: 285px;
+    height: 285px;
+    border-radius: 50%;
+    background-color: rgb(9, 9, 130);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    transition:  0.5s ease-out;
 }
 
-.active {
-    transition: border-radius 2s;
-    border-radius: 50px;
+.circle {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    border: 10px solid white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
