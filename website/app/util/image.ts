@@ -10,6 +10,8 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
     if (!ctx) {
         throw new Error("Could not get context from canvas")
     }
+    canvas.width = video.videoWidth - 1
+    canvas.height = video.videoHeight - 1
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
     
     const img = cv.imread(canvas)
@@ -20,7 +22,7 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
         sortPointsRadially(sudokuCorners)
         const flatPoints = sudokuCorners.flat()
         const transformedImg = new cv.Mat()
-        transformImgSection(img, transformedImg, flatPoints, [0, 0, img.cols, 0, img.rows, img.cols, 0, img.rows])
+        transformImgSection(img, transformedImg, flatPoints, [0, 0, transformedCanvas.width, 0, transformedCanvas.height, transformedCanvas.width, 0, transformedCanvas.height], new cv.Size(transformedCanvas.width, transformedCanvas.height))
         cv.imshow(transformedCanvas, transformedImg)
 
         const batchImagesArray = sudokuImgToBatchImagesArray(img)
@@ -47,28 +49,28 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
                     application.sudoku[i] = bestGuess
                     application.probability[i] = bestProbabilty
                 }
-                console.log(bestProbabilty)
             }
             drawSolutionOnCanvas(application.sudoku, solutionCanvas)
+
+            const solutionImg = cv.imread(solutionCanvas)
+            const transformedSolutionImg = new cv.Mat(video.videoWidth, video.videoHeight, cv.CV_8UC3)
+            const solutionCorners = [0, 0, solutionImg.cols, 0, solutionImg.cols, solutionImg.rows, 0, solutionImg.rows] 
+            transformImgSection(solutionImg, transformedSolutionImg, solutionCorners, sudokuCorners.flat(), new cv.Size(video.videoWidth, video.videoHeight))
+            
+            requestAnimationFrame(() => {
+                cv.imshow(transformedSolutionCanvas, transformedSolutionImg)
+                solutionImg.delete()
+                transformedSolutionImg.delete()
+            })
+
         })()
         }
 
+        
         transformedImg.delete()
     }
 
     img.delete()
-
-
-    // if (sudokuCorners) {
-    //     const solutionImg = cv.imread(solutionCanvas)
-    //     const transformedSolutionImg = new cv.Mat()
-    //     const solutionCorners = [0, 0, solutionImg.cols, 0, solutionImg.cols, solutionImg.rows, 0, solutionImg.rows] 
-    //     transformImgSection(solutionImg, transformedSolutionImg, solutionCorners, sudokuCorners.flat())
-    //     cv.imshow(transformedSolutionCanvas, transformedSolutionImg)
-    //     solutionImg.delete()
-    //     transformedSolutionImg.delete()
-    // }
-
 }
 
 
@@ -119,12 +121,14 @@ export function getCorners(img: cv.Mat, canvas: HTMLCanvasElement): number[][] |
 }
 
 
-export function transformImgSection(src: cv.Mat, dst: cv.Mat, inputPoints: number[], outputPoints: number[]) {
+export function transformImgSection(src: cv.Mat, dst: cv.Mat, inputPoints: number[], outputPoints: number[], dSize: cv.Size) {
     const inputMat = cv.matFromArray(4, 1, cv.CV_32FC2, inputPoints)
     const outputMat = cv.matFromArray(4, 1, cv.CV_32FC2, outputPoints)
     const transformationMatrix = cv.getPerspectiveTransform(inputMat, outputMat)
 
-    cv.warpPerspective(src, dst, transformationMatrix, dst.size())
+    const a = outputPoints.reduce((prev, curr) => Math.max(prev, curr), 0)
+
+    cv.warpPerspective(src, dst, transformationMatrix, dSize)
 
     inputMat.delete()
     outputMat.delete()

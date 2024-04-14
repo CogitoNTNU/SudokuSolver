@@ -26,8 +26,8 @@ export default function CameraFeed(props: CameraFeedProps) {
         try {
             streamRef.current = await navigator.mediaDevices.getUserMedia({
                 video: {
-                    width: props.width, 
-                    height: props.height,
+                    width: 600,
+                    height: 450,
                     facingMode: { exact: "environment" }
                 }
             }).catch((error: Error) => {

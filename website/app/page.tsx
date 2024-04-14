@@ -19,6 +19,7 @@ export default function Home() {
     const [cameraState, setCameraState] = useState<CameraState>(CameraState.Off)
     const [sudokuState, setSudokuState] = useState<SudokuState>(SudokuState.NotFound)
     const [model, setModel] = useState<LayersModel | null>(null)
+    const [windowSize, setWindowSize] = useState({width: 0, height: 0})
     
     const application = {
         cameraState,
@@ -37,6 +38,8 @@ export default function Home() {
         if (!videoRef.current || !canvasRef.current || !transformedCanvasRef.current || !solutionCanvasRef.current || !transformedSolutionCanvasRef.current) {
             throw new Error("Ref is not set to a value")
         }
+        transformedSolutionCanvasRef.current.width = videoRef.current.videoWidth
+        transformedSolutionCanvasRef.current.height = videoRef.current.videoHeight
         drawVideoOnCanvas(videoRef.current, canvasRef.current, application, transformedCanvasRef.current, solutionCanvasRef.current, transformedSolutionCanvasRef.current)
     } : () => {}, [model])
     
@@ -54,22 +57,26 @@ export default function Home() {
 
     useEffect(() => {
         loadModel()
+        setWindowSize({
+            width: window.innerWidth,
+            height: window.innerHeight
+        })
     }, [])
 
 
     return (
         <SudokuApplicationContext.Provider value={application}>
-            <main className={styles.main}>
-                <div className={styles.camera}>
-                    <div className={styles.cameraFeedContainer}>
-                        <CameraFeed videoRef={videoRef} width={300} height={300} cameraState={cameraState} setCameraState={setCameraState} callbackFunction={callbackFunction}/>
-                        <canvas className={styles.overlay} width={300} height={300} ref={transformedSolutionCanvasRef}></canvas>
+            <div className={styles.sudokuApplication}>
+                <div className={styles.cameraWrapper}>
+                    <div className={styles.camera}>
+                        <CameraFeed videoRef={videoRef} cameraState={cameraState} setCameraState={setCameraState} callbackFunction={callbackFunction}/>
+                        <canvas className={styles.overlay} ref={transformedSolutionCanvasRef}></canvas>
+                        <CameraButton/>
                     </div>
-                    <CameraButton/>
                 </div>
                 <canvas width={300} height={300} ref={canvasRef}></canvas>
-                <canvas width={300} height={300} ref={transformedCanvasRef}></canvas>
-            </main>
+                <canvas width={450} height={450} ref={transformedCanvasRef}></canvas>
+            </div>
             <canvas width={300} height={300} ref={solutionCanvasRef}></canvas>
 
         </SudokuApplicationContext.Provider>
