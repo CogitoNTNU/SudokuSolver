@@ -3,6 +3,7 @@ import cv from "@techstark/opencv-js"
 import { tensor2d } from "@tensorflow/tfjs"
 import { SudokuApplication, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE } from "../context/sudokuApplication/Types"
 import { sortPointsRadially } from "./sort"
+import { CameraState } from "../components/Camera/Types"
 
 
 export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasElement, application: SudokuApplication, transformedCanvas: HTMLCanvasElement, solutionCanvas: HTMLCanvasElement, transformedSolutionCanvas: HTMLCanvasElement) {
@@ -10,9 +11,11 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
     if (!ctx) {
         throw new Error("Could not get context from canvas")
     }
-    canvas.width = video.videoWidth - 1
-    canvas.height = video.videoHeight - 1
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+    if (canvas.width == 0 || canvas.height == 0) {
+        return
+    }
     
     const img = cv.imread(canvas)
     const sudokuCorners = getCorners(img, canvas)
@@ -33,37 +36,36 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
         predictionData.dispose()
 
         if (!Array.isArray(prediction)) {
-        (async () => {
-            const data = await prediction.data()
-            for (let i = 0; i < SUDOKU_SIZE; i++) {
-                let bestGuess = 0
-                let bestProbabilty = 0
-                for (let j = 0; j < 10; j++) {
-                    const probabilty = data[i*10+j]
-                    if (probabilty > bestProbabilty) {
-                        bestGuess = j
-                        bestProbabilty = probabilty
+            (async () => {
+                const data = await prediction.data()
+
+                for (let i = 0; i < SUDOKU_SIZE; i++) {
+                    let bestGuess = 0
+                    let bestProbabilty = 0
+                    for (let j = 0; j < 10; j++) {
+                        const probabilty = data[i*10+j]
+                        if (probabilty > bestProbabilty) {
+                            bestGuess = j
+                            bestProbabilty = probabilty
+                        }
+                    }
+                    if (bestProbabilty > application.probability[i]) {
+                        application.sudoku[i] = bestGuess
+                        application.probability[i] = bestProbabilty
                     }
                 }
-                if (bestProbabilty > application.probability[i]) {
-                    application.sudoku[i] = bestGuess
-                    application.probability[i] = bestProbabilty
-                }
-            }
-            drawSolutionOnCanvas(application.sudoku, solutionCanvas)
+                drawSolutionOnCanvas(application.sudoku, solutionCanvas)
 
-            const solutionImg = cv.imread(solutionCanvas)
-            const transformedSolutionImg = new cv.Mat(video.videoWidth, video.videoHeight, cv.CV_8UC3)
-            const solutionCorners = [0, 0, solutionImg.cols, 0, solutionImg.cols, solutionImg.rows, 0, solutionImg.rows] 
-            transformImgSection(solutionImg, transformedSolutionImg, solutionCorners, sudokuCorners.flat(), new cv.Size(video.videoWidth, video.videoHeight))
-            
-            requestAnimationFrame(() => {
+                const solutionImg = cv.imread(solutionCanvas)
+                const transformedSolutionImg = new cv.Mat()
+                const solutionCorners = [0, 0, solutionImg.cols, 0, solutionImg.cols, solutionImg.rows, 0, solutionImg.rows] 
+                transformImgSection(solutionImg, transformedSolutionImg, solutionCorners, sudokuCorners.flat(), new cv.Size(video.videoWidth, video.videoHeight))
+                
                 cv.imshow(transformedSolutionCanvas, transformedSolutionImg)
                 solutionImg.delete()
                 transformedSolutionImg.delete()
-            })
 
-        })()
+            })()
         }
 
         

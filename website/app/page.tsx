@@ -36,10 +36,8 @@ export default function Home() {
 
     const callbackFunction = useCallback(model ? () => {
         if (!videoRef.current || !canvasRef.current || !transformedCanvasRef.current || !solutionCanvasRef.current || !transformedSolutionCanvasRef.current) {
-            throw new Error("Ref is not set to a value")
+            throw new Error("Ref is not used correctly")
         }
-        transformedSolutionCanvasRef.current.width = videoRef.current.videoWidth
-        transformedSolutionCanvasRef.current.height = videoRef.current.videoHeight
         drawVideoOnCanvas(videoRef.current, canvasRef.current, application, transformedCanvasRef.current, solutionCanvasRef.current, transformedSolutionCanvasRef.current)
     } : () => {}, [model])
     
@@ -64,17 +62,30 @@ export default function Home() {
     }, [])
 
 
+    useEffect(() => {
+        if (!transformedSolutionCanvasRef.current || !videoRef.current || !canvasRef.current) {
+            throw new Error("Ref is not used correctly")
+        }
+        transformedSolutionCanvasRef.current.width = videoRef.current.videoWidth
+        transformedSolutionCanvasRef.current.height = videoRef.current.videoHeight
+        canvasRef.current.width = videoRef.current.videoWidth
+        canvasRef.current.height = videoRef.current.videoHeight
+        console.log("state changed")
+    }, [cameraState])
+
+
     return (
         <SudokuApplicationContext.Provider value={application}>
             <div className={styles.sudokuApplication}>
                 <div className={styles.cameraWrapper}>
                     <div className={styles.camera}>
                         <CameraFeed videoRef={videoRef} cameraState={cameraState} setCameraState={setCameraState} callbackFunction={callbackFunction}/>
-                        <canvas className={styles.overlay} ref={transformedSolutionCanvasRef}></canvas>
+                        {/* <canvas className={styles.overlay} ref={transformedSolutionCanvasRef}></canvas> */}
+                        <canvas className={`${styles.overlay} ${cameraState == CameraState.Off ? styles.hidden : ""}`} ref={transformedSolutionCanvasRef}></canvas>
                         <CameraButton/>
                     </div>
                 </div>
-                <canvas width={300} height={300} ref={canvasRef}></canvas>
+                <canvas ref={canvasRef}></canvas>
                 <canvas width={450} height={450} ref={transformedCanvasRef}></canvas>
             </div>
             <canvas width={300} height={300} ref={solutionCanvasRef}></canvas>

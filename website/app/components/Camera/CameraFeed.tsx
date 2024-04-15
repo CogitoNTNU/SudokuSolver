@@ -19,6 +19,7 @@ export default function CameraFeed(props: CameraFeedProps) {
         }
         callbackWrapper()
         props.setCameraState(CameraState.On)
+        // console.log(props.videoRef.current?.width, props.videoRef.current?.height)
     }, [])
 
 
@@ -26,8 +27,6 @@ export default function CameraFeed(props: CameraFeedProps) {
         try {
             streamRef.current = await navigator.mediaDevices.getUserMedia({
                 video: {
-                    width: 600,
-                    height: 450,
                     facingMode: { exact: "environment" }
                 }
             }).catch((error: Error) => {
@@ -48,7 +47,7 @@ export default function CameraFeed(props: CameraFeedProps) {
                 props.setCameraState(CameraState.Off)
                 return
             })
-            video.addEventListener("play", handleVideoPlay)
+            video.addEventListener("loadedmetadata", handleVideoPlay)
         }
         catch (error)  {
             console.error(error)
