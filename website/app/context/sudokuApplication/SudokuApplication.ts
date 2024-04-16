@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react"
-import { SudokuApplication } from "./Types"
+import { SudokuApplication } from "./types"
 
 
 export const SudokuApplicationContext = createContext<SudokuApplication | null>(null)

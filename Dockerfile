@@ -1,20 +1,19 @@
-# Import official image from node
-FROM node:20
+# Use the official image as a parent image
+FROM node:20 
 
-# Change work directory
+# Set the working directory
 WORKDIR /website
 
 # Copy npm package files
 COPY website/package*.json ./
 
-# Install node_modules
+# Run the command inside your image filesystem
 RUN npm i
 
 # Copy next.js source code
 COPY /website .
 
-# Open port 3000
 EXPOSE 3000
 
-# Run website
+# Run the specified command within the container.
 RUN npm run dev

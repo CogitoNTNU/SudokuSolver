@@ -1,6 +1,6 @@
 import styles from "./CameraButton.module.scss"
 import { useSudokuApplicationContext } from "@/app/context/sudokuApplication/SudokuApplication"
-import { SudokuState, SUDOKU_SIZE } from "@/app/context/sudokuApplication/Types"
+import { SudokuState, SUDOKU_SIZE } from "@/app/context/sudokuApplication/types"
 import { CameraState } from "./Types"
 
 
