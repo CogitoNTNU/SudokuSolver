@@ -1,0 +1,12 @@
+version: "3.7"
+services:
+ api:
+  build:
+   context: .
+   target: build
+  volumes:
+   - ./:/website
+   - /website/node_modules
+  ports:
+   - 3000:3000
+  command: npm run dev

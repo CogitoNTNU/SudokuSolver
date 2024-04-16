@@ -5,13 +5,13 @@ FROM node:20
 WORKDIR /website
 
 # Copy npm package files
-COPY package*.json ./
+COPY website/package*.json ./
 
 # Install node_modules
 RUN npm i
 
 # Copy next.js source code
-COPY . .
+COPY /website .
 
 # Open port 3000
 EXPOSE 3000
