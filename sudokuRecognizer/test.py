@@ -4,10 +4,10 @@ from numberRecognizer import NumberRecognizer
 
 # Load model
 model = NumberRecognizer()
-model.load("sudokuRecognizer/models/21.03.24-09:47:43.keras")
+model.load("sudokuRecognizer/models/23-48-64-80-96-112-128.keras")
 
 # Load Image
-image = cv2.imread("sudokuRecognizer/test.png")
+image = cv2.imread("sudokuRecognizer/img/8.png")
 image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 image = cv2.resize(image, (28, 28))
 
