@@ -27,7 +27,7 @@ export default function CameraFeed(props: CameraFeedProps) {
         try {
             streamRef.current = await navigator.mediaDevices.getUserMedia({
                 video: {
-                    facingMode: { exact: "environment" }
+                    // facingMode: { exact: "environment" }
                 }
             }).catch((error: Error) => {
                 props.setCameraState(CameraState.Off)
