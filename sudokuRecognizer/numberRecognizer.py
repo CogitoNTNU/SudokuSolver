@@ -10,6 +10,7 @@ class NumberRecognizer:
 
     def load(self, filename):
         self.model = tf.keras.models.load_model(filename)
+        self.model.steps_per_execution = 1  # Quick fix
 
     def image_to_num(self, image: MatLike) -> int:
         predictions = self.model.predict(image)
