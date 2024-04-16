@@ -3,7 +3,7 @@ services:
  api:
   build:
    context: .
-   target: build
+   dockerfile: Dockerfile
   volumes:
    - ./:/website
    - /website/node_modules

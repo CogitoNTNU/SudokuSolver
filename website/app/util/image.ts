@@ -1,7 +1,7 @@
 "use client"
 import cv from "@techstark/opencv-js"
 import { tensor2d } from "@tensorflow/tfjs"
-import { SudokuApplication, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE } from "../context/sudokuApplication/types"
+import { SudokuApplication, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE } from "../context/sudokuApplication/Types"
 import { sortPointsRadially } from "./sort"
 import { CameraState } from "../components/Camera/Types"
 

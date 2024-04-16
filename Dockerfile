@@ -16,4 +16,4 @@ COPY /website .
 EXPOSE 3000
 
 # Run the specified command within the container.
-RUN npm run dev
+RUN npx next dev
