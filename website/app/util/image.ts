@@ -3,7 +3,6 @@ import cv from "@techstark/opencv-js"
 import { tensor2d } from "@tensorflow/tfjs"
 import { SudokuApplication, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE } from "../context/sudokuApplication/Types"
 import { sortPointsRadially } from "./sort"
-import { CameraState } from "../components/Camera/Types"
 
 
 export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasElement, application: SudokuApplication, transformedCanvas: HTMLCanvasElement, solutionCanvas: HTMLCanvasElement, transformedSolutionCanvas: HTMLCanvasElement) {
@@ -28,10 +27,10 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
         transformImgSection(img, transformedImg, flatPoints, [0, 0, transformedCanvas.width, 0, transformedCanvas.height, transformedCanvas.width, 0, transformedCanvas.height], new cv.Size(transformedCanvas.width, transformedCanvas.height))
         cv.imshow(transformedCanvas, transformedImg)
 
-        const batchImagesArray = sudokuImgToBatchImagesArray(img)
+        const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(img)
 
-        const batchImagesTensor = tensor2d(batchImagesArray, [SUDOKU_SIZE, NUMBER_IMAGE_SIZE])
-        const predictionData = batchImagesTensor.reshape([SUDOKU_SIZE, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, 1])
+        const batchImagesTensor = tensor2d(batchImagesArray, [indices.length, NUMBER_IMAGE_SIZE])
+        const predictionData = batchImagesTensor.reshape([indices.length, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, 1])
         const prediction = application.model.predict(predictionData)
         predictionData.dispose()
 
@@ -39,7 +38,7 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
             (async () => {
                 const data = await prediction.data()
 
-                for (let i = 0; i < SUDOKU_SIZE; i++) {
+                for (let i = 0; i < indices.length; i++) {
                     let bestGuess = 0
                     let bestProbabilty = 0
                     for (let j = 0; j < 10; j++) {
@@ -50,8 +49,8 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
                         }
                     }
                     if (bestProbabilty > application.probability[i]) {
-                        application.sudoku[i] = bestGuess
-                        application.probability[i] = bestProbabilty
+                        application.sudoku[indices[i]] = bestGuess
+                        application.probability[indices[i]] = bestProbabilty
                     }
                 }
                 drawSolutionOnCanvas(application.sudoku, solutionCanvas)
@@ -159,7 +158,7 @@ export function drawSolutionOnCanvas(solution: Uint8Array, canvas: HTMLCanvasEle
 }
 
 
-export function sudokuImgToBatchImagesArray(img: cv.Mat): Float32Array {
+export function sudokuImgToBatchImagesArray(img: cv.Mat): [Float32Array, number[]] {
     const batchImagesArray = new Float32Array(SUDOKU_SIZE * NUMBER_IMAGE_SIZE)
 
     const resizedImg = new cv.Mat()
@@ -168,8 +167,10 @@ export function sudokuImgToBatchImagesArray(img: cv.Mat): Float32Array {
     cv.cvtColor(resizedImg, resizedImg, cv.COLOR_BGR2GRAY)
     cv.bitwise_not(resizedImg, resizedImg)
 
-    let dilateKernelSize = 2
-    let dilateKernel = cv.Mat.ones(dilateKernelSize, dilateKernelSize, cv.CV_8U)
+    const dilateKernelSize = 2
+    const dilateKernel = cv.Mat.ones(dilateKernelSize, dilateKernelSize, cv.CV_8U)
+
+    const indices: number[] = []
     
     for (let y = 0; y < SUDOKU_HEIGHT; y++) {
         for (let x = 0; x < SUDOKU_WIDTH; x++) {
@@ -181,9 +182,15 @@ export function sudokuImgToBatchImagesArray(img: cv.Mat): Float32Array {
             const mean = cv.mean(rect)[0]
             const thresh = mean + 60
             filter(rect, rect, thresh, 255)
-
+            
+            if (cv.mean(rect)[0] < 5) {
+                rect.delete()
+                continue
+            }
+            
             rect.convertTo(rect, cv.CV_32F, 1 / 255)
-            batchImagesArray.set(rect.data32F, x*NUMBER_IMAGE_SIZE + y*NUMBER_IMAGE_SIZE*SUDOKU_WIDTH)
+            batchImagesArray.set(rect.data32F, indices.length*NUMBER_IMAGE_SIZE)
+            indices.push(y*SUDOKU_WIDTH+x)
             
             rect.delete()
         }
@@ -191,7 +198,7 @@ export function sudokuImgToBatchImagesArray(img: cv.Mat): Float32Array {
     
     dilateKernel.delete()
     resizedImg.delete()
-    return batchImagesArray
+    return [batchImagesArray.slice(0, indices.length*NUMBER_IMAGE_SIZE), indices]
 }
 
 

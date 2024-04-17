@@ -48,14 +48,14 @@ function btnClick() {
     canvas.width = image.width
     canvas.height = image.height
     
-    ctx.drawImage(image, 0, 0)
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
     
     const img = cv.imread(canvas)
-    const batchImagesArray = sudokuImgToBatchImagesArray(img)
+    const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(img)
     img.delete()
 
-    const batchImagesTensor = tensor2d(batchImagesArray, [SUDOKU_SIZE, NUMBER_IMAGE_SIZE])
-    const predictionData = batchImagesTensor.reshape([SUDOKU_SIZE, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, 1])
+    const batchImagesTensor = tensor2d(batchImagesArray, [indices.length, NUMBER_IMAGE_SIZE])
+    const predictionData = batchImagesTensor.reshape([indices.length, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, 1])
     const prediction = model.predict(predictionData)
     predictionData.dispose()
 
@@ -67,9 +67,17 @@ function btnClick() {
             predictions.push([])
             for (let x = 0; x < SUDOKU_WIDTH; x++) {
                 predictions[y].push([])
-                for (let i = 0; i < 10; i++) {
-                    predictions[y][x].push(data[(y*SUDOKU_WIDTH + x)*10 + i])
+                for (let i = 0; i < 9; i++) {
+                    // predictions[y][x].push(data[(y*SUDOKU_WIDTH + x)*9 + i])
+                    predictions[y][x].push(0)
                 }
+            }
+        }
+        for (let i = 0; i < indices.length; i++) {
+            let y = Math.floor(indices[i]/SUDOKU_WIDTH)
+            let x = indices[i]%SUDOKU_WIDTH
+            for (let j = 0; j < 9; j++) {
+                predictions[y][x][j] = data[indices[i]*9+j]
             }
         }
         console.log(predictions)
@@ -79,19 +87,19 @@ function btnClick() {
     const imgData = new ImageData(NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH, NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT)
     let index = 0
     for (let w = 0; w < 9; w++) {
-    for (let y = 0; y < 28; y++) {
-        for (let x = 0; x < 9; x ++) {
-            for (let z = 0; z < 28; z++) {
-                const i =  batchImagesArray[w*7056 + x*28*28 + z + y*28]
-                const j = Math.floor(i * 255)
-                imgData.data[index] = j
-                imgData.data[index+1] = j
-                imgData.data[index+2] = j
-                imgData.data[index+3] = 255
-                index += 4
-            } 
+        for (let y = 0; y < 28; y++) {
+            for (let x = 0; x < 9; x ++) {
+                for (let z = 0; z < 28; z++) {
+                    const i =  batchImagesArray[w*7056 + x*28*28 + z + y*28]
+                    const j = Math.floor(i * 255)
+                    imgData.data[index] = j
+                    imgData.data[index+1] = j
+                    imgData.data[index+2] = j
+                    imgData.data[index+3] = 255
+                    index += 4
+                } 
+            }
         }
-    }
     }
     
     canvas.width = NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH
@@ -101,7 +109,8 @@ function btnClick() {
 
 return (
     <div>
-        <img ref={imageRef} className={styles.hidden} src="/square.jpg" alt="" />
+        <img ref={imageRef} className={styles.image} src="/square.jpg" alt="" />
+        {/* <img ref={imageRef} className={styles.hidden} src="/square.jpg" alt="" /> */}
         <button onClick={btnClick}>Trykk på meg</button>
         <canvas ref={canvasRef}></canvas>
         <div>
@@ -125,12 +134,12 @@ return (
                 canvas.width = image.width
                 canvas.height = image.height
                 
-                ctx.drawImage(image, 0, 0)
+                ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
                 
                 const img = cv.imread(canvas)
                 cv.resize(img, img, new cv.Size(SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH, SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT))
                 cv.imshow(canvas, img)
-                const batchImagesArray = sudokuImgToBatchImagesArray(img)
+                const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(img)
                 img.delete()
                 const section = batchImagesArray.slice(NUMBER_IMAGE_SIZE*value, NUMBER_IMAGE_SIZE*(value+1))
     
@@ -163,12 +172,12 @@ return (
             canvas.width = image.width
             canvas.height = image.height
             
-            ctx.drawImage(image, 0, 0)
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
             
             const img = cv.imread(canvas)
             cv.resize(img, img, new cv.Size(SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH, SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT))
             cv.imshow(canvas, img)
-            const batchImagesArray = sudokuImgToBatchImagesArray(img)
+            const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(img)
             img.delete()
             const section = batchImagesArray.slice(NUMBER_IMAGE_SIZE*input, NUMBER_IMAGE_SIZE*(input+1))
 
@@ -183,15 +192,15 @@ return (
 
             dctx.putImageData(imgData, 0, 0)
 
-            const batchImagesTensor = tensor2d(batchImagesArray, [SUDOKU_SIZE, NUMBER_IMAGE_SIZE])
-            const predictionData = batchImagesTensor.reshape([SUDOKU_SIZE, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, 1])
+            const batchImagesTensor = tensor2d(batchImagesArray, [indices.length, NUMBER_IMAGE_SIZE])
+            const predictionData = batchImagesTensor.reshape([indices.length, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, 1])
             const prediction = model.predict(predictionData)
             predictionData.dispose()
 
             if (!Array.isArray(prediction)) {
             (async () => {
                 const data = await prediction.data()
-                console.log(data.slice(input*10, (input+1)*10))
+                console.log(data.slice(input*9, (input+1)*9))
             })()
             }
 
