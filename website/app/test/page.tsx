@@ -10,7 +10,9 @@ import { sudokuImgToBatchImagesArray } from "../util/image"
 export default function Page() {
 const [model, setModel] = useState<LayersModel | null>(null)
 const canvasRef = useRef<HTMLCanvasElement | null>(null)
+const digitCanvasRef = useRef<HTMLCanvasElement | null>(null)
 const imageRef = useRef<HTMLImageElement | null>(null)
+const [input, setInput] = useState<number>(0)
 
 useEffect(() => {
     async function loadModel() {
@@ -69,7 +71,7 @@ function btnClick() {
                     predictions[y][x].push(data[(y*SUDOKU_WIDTH + x)*10 + i])
                 }
             }
-        } 
+        }
         console.log(predictions)
     })()
     }
@@ -95,14 +97,109 @@ function btnClick() {
     canvas.width = NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH
     canvas.height = NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT
     ctx.putImageData(imgData, 0, 0)
-    
 }
 
 return (
     <div>
-    <img ref={imageRef} className={styles.hidden} src="/square.jpg" alt="" />
-    <button onClick={btnClick}>Trykk på meg</button>
-    <canvas ref={canvasRef}></canvas>
+        <img ref={imageRef} className={styles.hidden} src="/square.jpg" alt="" />
+        <button onClick={btnClick}>Trykk på meg</button>
+        <canvas ref={canvasRef}></canvas>
+        <div>
+            <p>{input}</p>
+            <input type="number" min={0} max={80} onChange={event => {
+                const value = Number(event.target.value)
+                setInput(value)
+                if (!canvasRef.current || !digitCanvasRef.current || !imageRef.current || !model) {
+                    return
+                }
+                const canvas = canvasRef.current
+                const digitCanvas = digitCanvasRef.current
+                const ctx = canvas.getContext("2d")
+                const dctx = digitCanvas.getContext("2d")
+                if (!ctx || !dctx) {
+                    return
+                }
+                
+                const image = imageRef.current
+            
+                canvas.width = image.width
+                canvas.height = image.height
+                
+                ctx.drawImage(image, 0, 0)
+                
+                const img = cv.imread(canvas)
+                cv.resize(img, img, new cv.Size(SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH, SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT))
+                cv.imshow(canvas, img)
+                const batchImagesArray = sudokuImgToBatchImagesArray(img)
+                img.delete()
+                const section = batchImagesArray.slice(NUMBER_IMAGE_SIZE*value, NUMBER_IMAGE_SIZE*(value+1))
+    
+                const imgData = new ImageData(NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT)
+                for (let i = 0; i < NUMBER_IMAGE_SIZE; i++) {
+                    const color = section[i]*255
+                    imgData.data[i*4] = color
+                    imgData.data[i*4+1] = color
+                    imgData.data[i*4+2] = color
+                    imgData.data[i*4+3] = 255
+                }
+    
+                dctx.putImageData(imgData, 0, 0)
+            }}/>
+        </div>
+        <button onClick={() => {
+            if (!canvasRef.current || !digitCanvasRef.current || !imageRef.current || !model) {
+                return
+            }
+            const canvas = canvasRef.current
+            const digitCanvas = digitCanvasRef.current
+            const ctx = canvas.getContext("2d")
+            const dctx = digitCanvas.getContext("2d")
+            if (!ctx || !dctx) {
+                return
+            }
+            
+            const image = imageRef.current
+        
+            canvas.width = image.width
+            canvas.height = image.height
+            
+            ctx.drawImage(image, 0, 0)
+            
+            const img = cv.imread(canvas)
+            cv.resize(img, img, new cv.Size(SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH, SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT))
+            cv.imshow(canvas, img)
+            const batchImagesArray = sudokuImgToBatchImagesArray(img)
+            img.delete()
+            const section = batchImagesArray.slice(NUMBER_IMAGE_SIZE*input, NUMBER_IMAGE_SIZE*(input+1))
+
+            const imgData = new ImageData(NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT)
+            for (let i = 0; i < NUMBER_IMAGE_SIZE; i++) {
+                const color = section[i]*255
+                imgData.data[i*4] = color
+                imgData.data[i*4+1] = color
+                imgData.data[i*4+2] = color
+                imgData.data[i*4+3] = 255
+            }
+
+            dctx.putImageData(imgData, 0, 0)
+
+            const batchImagesTensor = tensor2d(batchImagesArray, [SUDOKU_SIZE, NUMBER_IMAGE_SIZE])
+            const predictionData = batchImagesTensor.reshape([SUDOKU_SIZE, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, 1])
+            const prediction = model.predict(predictionData)
+            predictionData.dispose()
+
+            if (!Array.isArray(prediction)) {
+            (async () => {
+                const data = await prediction.data()
+                console.log(data.slice(input*10, (input+1)*10))
+            })()
+            }
+
+        }
+            
+        }
+        >Predict number</button>
+        <canvas ref={digitCanvasRef}></canvas>
     </div>
 )
 }

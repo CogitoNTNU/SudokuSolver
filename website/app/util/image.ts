@@ -168,19 +168,19 @@ export function sudokuImgToBatchImagesArray(img: cv.Mat): Float32Array {
     cv.cvtColor(resizedImg, resizedImg, cv.COLOR_BGR2GRAY)
     cv.bitwise_not(resizedImg, resizedImg)
 
-    // let kernelSize = 3
-    // let kernel = cv.Mat.ones(kernelSize, kernelSize, cv.CV_8U)
-    // cv.dilate(resizedImg, resizedImg, kernel)
+    let dilateKernelSize = 2
+    let dilateKernel = cv.Mat.ones(dilateKernelSize, dilateKernelSize, cv.CV_8U)
     
     for (let y = 0; y < SUDOKU_HEIGHT; y++) {
         for (let x = 0; x < SUDOKU_WIDTH; x++) {
             const rect = resizedImg.roi(new cv.Rect(x*NUMBER_IMAGE_WIDTH,y*NUMBER_IMAGE_HEIGHT,NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT))
+            
+            setBorder(rect, 3, 0)
+            cv.dilate(rect, rect, dilateKernel)
 
             const mean = cv.mean(rect)[0]
             const thresh = mean + 60
-
             filter(rect, rect, thresh, 255)
-            setBorder(rect, 3, 0)
 
             rect.convertTo(rect, cv.CV_32F, 1 / 255)
             batchImagesArray.set(rect.data32F, x*NUMBER_IMAGE_SIZE + y*NUMBER_IMAGE_SIZE*SUDOKU_WIDTH)
@@ -189,6 +189,7 @@ export function sudokuImgToBatchImagesArray(img: cv.Mat): Float32Array {
         }
     }
     
+    dilateKernel.delete()
     resizedImg.delete()
     return batchImagesArray
 }
