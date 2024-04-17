@@ -43,7 +43,7 @@ export default function Home() {
     
 
     const loadModel = useCallback(() => {
-        loadLayersModel('/models/model/model.json').then(loadedModel => {
+        loadLayersModel('/models/tfjs_model/model.json').then(loadedModel => {
             setModel(loadedModel)
             console.log("model loaded")
         })

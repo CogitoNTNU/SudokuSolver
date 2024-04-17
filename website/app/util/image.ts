@@ -78,9 +78,9 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
 
 export function getCorners(img: cv.Mat, canvas: HTMLCanvasElement): number[][] | null {
     const outputImg = new cv.Mat()
-    cv.GaussianBlur(img, outputImg, new cv.Size(7, 7), 1.75);
-    cv.cvtColor(outputImg, outputImg, cv.COLOR_RGBA2GRAY, 0);
-    cv.adaptiveThreshold(outputImg, outputImg, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 11, 2);
+    cv.GaussianBlur(img, outputImg, new cv.Size(7, 7), 1.75)
+    cv.cvtColor(outputImg, outputImg, cv.COLOR_RGBA2GRAY, 0)
+    cv.adaptiveThreshold(outputImg, outputImg, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 11, 2)
     const contours = new cv.MatVector()
     const hierarchy = new cv.Mat()
     cv.findContours(outputImg, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
@@ -167,6 +167,10 @@ export function sudokuImgToBatchImagesArray(img: cv.Mat): Float32Array {
 
     cv.cvtColor(resizedImg, resizedImg, cv.COLOR_BGR2GRAY)
     cv.bitwise_not(resizedImg, resizedImg)
+
+    // let kernelSize = 3
+    // let kernel = cv.Mat.ones(kernelSize, kernelSize, cv.CV_8U)
+    // cv.dilate(resizedImg, resizedImg, kernel)
     
     for (let y = 0; y < SUDOKU_HEIGHT; y++) {
         for (let x = 0; x < SUDOKU_WIDTH; x++) {
