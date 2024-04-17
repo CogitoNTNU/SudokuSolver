@@ -158,6 +158,7 @@ export function drawSolutionOnCanvas(solution: Uint8Array, canvas: HTMLCanvasEle
     }
 }
 
+
 export function sudokuImgToBatchImagesArray(img: cv.Mat): Float32Array {
     const batchImagesArray = new Float32Array(SUDOKU_SIZE * NUMBER_IMAGE_SIZE)
 
@@ -165,17 +166,46 @@ export function sudokuImgToBatchImagesArray(img: cv.Mat): Float32Array {
     cv.resize(img, resizedImg, new cv.Size(SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH, SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT))
 
     cv.cvtColor(resizedImg, resizedImg, cv.COLOR_BGR2GRAY)
-    // cv.bitwise_not(resizedImg, resizedImg) 
+    cv.bitwise_not(resizedImg, resizedImg)
     
     for (let y = 0; y < SUDOKU_HEIGHT; y++) {
         for (let x = 0; x < SUDOKU_WIDTH; x++) {
-            const floatImg = new cv.Mat()
             const rect = resizedImg.roi(new cv.Rect(x*NUMBER_IMAGE_WIDTH,y*NUMBER_IMAGE_HEIGHT,NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT))
-            rect.convertTo(floatImg, cv.CV_32F, 1 / 255)
-            batchImagesArray.set(floatImg.data32F, x*NUMBER_IMAGE_SIZE + y*NUMBER_IMAGE_SIZE*SUDOKU_WIDTH)
+
+            const mean = cv.mean(rect)[0]
+            const thresh = mean + 60
+
+            filter(rect, rect, thresh, 255)
+            setBorder(rect, 3, 0)
+
+            rect.convertTo(rect, cv.CV_32F, 1 / 255)
+            batchImagesArray.set(rect.data32F, x*NUMBER_IMAGE_SIZE + y*NUMBER_IMAGE_SIZE*SUDOKU_WIDTH)
+            
+            rect.delete()
         }
     }
     
     resizedImg.delete()
     return batchImagesArray
+}
+
+
+export function filter(src: cv.Mat, dst: cv.Mat, thresh: number, maxval: number) {
+    const mask = new cv.Mat()
+    cv.threshold(src, mask, thresh, 255, cv.THRESH_BINARY)
+    cv.bitwise_and(src, mask, dst)
+    mask.delete()
+}
+
+
+export function setBorder(img: cv.Mat, borderSize: number, val: number) {
+    let topROI = new cv.Rect(0, 0, img.cols, borderSize)
+    let bottomROI = new cv.Rect(0, img.rows - borderSize, img.cols, borderSize)
+    let leftROI = new cv.Rect(0, 0, borderSize, img.rows)
+    let rightROI = new cv.Rect(img.cols - borderSize, 0, borderSize, img.rows)
+
+    img.roi(topROI).setTo(new cv.Scalar(val))
+    img.roi(bottomROI).setTo(new cv.Scalar(val))
+    img.roi(leftROI).setTo(new cv.Scalar(val))
+    img.roi(rightROI).setTo(new cv.Scalar(val))
 }
