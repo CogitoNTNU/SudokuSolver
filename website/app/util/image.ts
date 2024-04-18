@@ -1,7 +1,7 @@
 "use client"
 import cv from "@techstark/opencv-js"
-import { tensor2d } from "@tensorflow/tfjs"
 import { SudokuApplication, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE } from "../context/sudokuApplication/Types"
+import { predictBatchImages } from "./model"
 import { sortPointsRadially } from "./sort"
 
 
@@ -51,43 +51,38 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
         batchCanvas.height = NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT
         bctx.putImageData(imgData, 0, 0)
 
-        const batchImagesTensor = tensor2d(batchImagesArray, [indices.length, NUMBER_IMAGE_SIZE])
-        const predictionData = batchImagesTensor.reshape([indices.length, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, 1])
-        const prediction = application.model.predict(predictionData)
-        predictionData.dispose()
+        const prediction = predictBatchImages(batchImagesArray, application.model, indices.length);
 
-        if (!Array.isArray(prediction)) {
-            (async () => {
-                const data = await prediction.data()
+        (async () => {
+            const data = await prediction.data()
 
-                for (let i = 0; i < indices.length; i++) {
-                    let bestGuess = 0
-                    let bestProbabilty = 0
-                    for (let j = 0; j < 9; j++) {
-                        const probabilty = data[i*9+j]
-                        if (probabilty > bestProbabilty) {
-                            bestGuess = j
-                            bestProbabilty = probabilty
-                        }
-                    }
-                    if (bestProbabilty > application.probability[i]) {
-                        application.sudoku[indices[i]] = bestGuess
-                        application.probability[indices[i]] = bestProbabilty
+            for (let i = 0; i < indices.length; i++) {
+                let bestGuess = 0
+                let bestProbabilty = 0
+                for (let j = 0; j < 9; j++) {
+                    const probabilty = data[i*9+j]
+                    if (probabilty > bestProbabilty) {
+                        bestGuess = j
+                        bestProbabilty = probabilty
                     }
                 }
-                drawSolutionOnCanvas(application.sudoku, solutionCanvas)
+                if (bestProbabilty > application.probability[i]) {
+                    application.sudoku[indices[i]] = bestGuess
+                    application.probability[indices[i]] = bestProbabilty
+                }
+            }
+            drawSolutionOnCanvas(application.sudoku, solutionCanvas)
 
-                const solutionImg = cv.imread(solutionCanvas)
-                const transformedSolutionImg = new cv.Mat()
-                const solutionCorners = [0, 0, solutionImg.cols, 0, solutionImg.cols, solutionImg.rows, 0, solutionImg.rows] 
-                transformImgSection(solutionImg, transformedSolutionImg, solutionCorners, sudokuCorners.flat(), new cv.Size(video.videoWidth, video.videoHeight))
-                
-                cv.imshow(transformedSolutionCanvas, transformedSolutionImg)
-                solutionImg.delete()
-                transformedSolutionImg.delete()
+            const solutionImg = cv.imread(solutionCanvas)
+            const transformedSolutionImg = new cv.Mat()
+            const solutionCorners = [0, 0, solutionImg.cols, 0, solutionImg.cols, solutionImg.rows, 0, solutionImg.rows] 
+            transformImgSection(solutionImg, transformedSolutionImg, solutionCorners, sudokuCorners.flat(), new cv.Size(video.videoWidth, video.videoHeight))
+            
+            cv.imshow(transformedSolutionCanvas, transformedSolutionImg)
+            solutionImg.delete()
+            transformedSolutionImg.delete()
 
-            })()
-        }
+        })()
 
         
         transformedImg.delete()
@@ -224,7 +219,7 @@ export function sudokuImgToBatchImagesArray(img: cv.Mat): [Float32Array, number[
 
 export function filter(src: cv.Mat, dst: cv.Mat, thresh: number, maxval: number) {
     const mask = new cv.Mat()
-    cv.threshold(src, mask, thresh, 255, cv.THRESH_BINARY)
+    cv.threshold(src, mask, thresh, maxval, cv.THRESH_BINARY)
     cv.bitwise_and(src, mask, dst)
     mask.delete()
 }

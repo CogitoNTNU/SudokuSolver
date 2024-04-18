@@ -1,10 +1,12 @@
 "use client"
 import styles from "./page.module.scss"
 import { useEffect, useState, useRef } from "react"
-import { loadLayersModel, LayersModel, tensor2d } from "@tensorflow/tfjs"
+import { loadLayersModel, LayersModel } from "@tensorflow/tfjs"
 import cv from "@techstark/opencv-js"
 import { NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_SIZE, SUDOKU_HEIGHT, SUDOKU_WIDTH, SUDOKU_SIZE } from "../context/sudokuApplication/Types"
 import { sudokuImgToBatchImagesArray } from "../util/image"
+import { predictBatchImages } from "../util/model"
+import { formatPredictionData } from "../util/model"
 
 
 export default function Page() {
@@ -54,35 +56,13 @@ function btnClick() {
     const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(img)
     img.delete()
 
-    const batchImagesTensor = tensor2d(batchImagesArray, [indices.length, NUMBER_IMAGE_SIZE])
-    const predictionData = batchImagesTensor.reshape([indices.length, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, 1])
-    const prediction = model.predict(predictionData)
-    predictionData.dispose()
+    const prediction = predictBatchImages(batchImagesArray, model, indices.length);
 
-    if (!Array.isArray(prediction)) {
     (async () => {
         const data = await prediction.data()
-        const predictions: number[][][] = []
-        for (let y = 0; y < SUDOKU_HEIGHT; y++) {
-            predictions.push([])
-            for (let x = 0; x < SUDOKU_WIDTH; x++) {
-                predictions[y].push([])
-                for (let i = 0; i < 9; i++) {
-                    // predictions[y][x].push(data[(y*SUDOKU_WIDTH + x)*9 + i])
-                    predictions[y][x].push(0)
-                }
-            }
-        }
-        for (let i = 0; i < indices.length; i++) {
-            let y = Math.floor(indices[i]/SUDOKU_WIDTH)
-            let x = indices[i]%SUDOKU_WIDTH
-            for (let j = 0; j < 9; j++) {
-                predictions[y][x][j] = data[indices[i]*9+j]
-            }
-        }
-        console.log(predictions)
+        const formated = formatPredictionData(data, indices)
+        console.log(formated)
     })()
-    }
     
     const imgData = new ImageData(NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH, NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT)
     let index = 0
@@ -192,17 +172,12 @@ return (
 
             dctx.putImageData(imgData, 0, 0)
 
-            const batchImagesTensor = tensor2d(batchImagesArray, [indices.length, NUMBER_IMAGE_SIZE])
-            const predictionData = batchImagesTensor.reshape([indices.length, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, 1])
-            const prediction = model.predict(predictionData)
-            predictionData.dispose()
+            const prediction = predictBatchImages(batchImagesArray, model, indices.length);
 
-            if (!Array.isArray(prediction)) {
             (async () => {
                 const data = await prediction.data()
                 console.log(data.slice(input*9, (input+1)*9))
             })()
-            }
 
         }
             

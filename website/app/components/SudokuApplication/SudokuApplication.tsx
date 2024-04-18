@@ -3,10 +3,14 @@ import styles from "./SudokuApplication.module.scss"
 import CameraFeed from "../Camera/CameraFeed"
 import CameraButton from "../Camera/CameraButton"
 import { useRef, useEffect, useCallback } from "react"
+import cv from "@techstark/opencv-js"
 import { CameraState } from "../Camera/Types" 
 import { drawVideoOnCanvas } from "../../util/image"
 import { useSudokuApplicationContext } from "../../context/sudokuApplication/SudokuApplication"
 import { loadLayersModel } from "@tensorflow/tfjs"
+import { sudokuImgToBatchImagesArray } from "../../util/image"
+import { formatPredictionData, predictBatchImages } from "@/app/util/model"
+import { NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, SUDOKU_WIDTH, SUDOKU_HEIGHT } from "@/app/context/sudokuApplication/Types"
 
 
 export default function SudokuApplicationElement() {
@@ -60,6 +64,46 @@ export default function SudokuApplicationElement() {
         console.log(application.sudoku)
     }, [])
 
+
+    const predict = useCallback(() => {
+        if (transformedCanvasRef.current && application.model && batchCanvasRef.current) {
+            console.log("yes")
+            const img = cv.imread(transformedCanvasRef.current)
+            const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(img)
+            const prediction = predictBatchImages(batchImagesArray, application.model, indices.length);
+            
+            (async () => {
+                const data = await prediction.data()
+                const formated = formatPredictionData(data, indices)
+                console.log(formated)
+            })()
+            const imgData = new ImageData(NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH, NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT)
+            let index = 0
+            for (let w = 0; w < 9; w++) {
+                for (let y = 0; y < 28; y++) {
+                    for (let x = 0; x < 9; x ++) {
+                        for (let z = 0; z < 28; z++) {
+                            const i =  batchImagesArray[w*7056 + x*28*28 + z + y*28]
+                            const j = Math.floor(i * 255)
+                            imgData.data[index] = j
+                            imgData.data[index+1] = j
+                            imgData.data[index+2] = j
+                            imgData.data[index+3] = 255
+                            index += 4
+                        } 
+                    }
+                }
+            }
+
+            const bctx = batchCanvasRef.current.getContext("2d")
+            if (bctx) {
+                batchCanvasRef.current.width = NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH
+                batchCanvasRef.current.height = NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT
+                bctx.putImageData(imgData, 0, 0)
+            }
+        }
+    }, [])
+
     return (
         <>
             <div className={styles.sudokuApplication}>
@@ -76,6 +120,7 @@ export default function SudokuApplicationElement() {
             <canvas width={300} height={300} ref={solutionCanvasRef}></canvas>
             <canvas ref={batchCanvasRef}></canvas>
             <button onClick={logSudoku}>Log sudoku</button>
+            <button onClick={predict}>Predict sudoku</button>
         </>
     )
 }
