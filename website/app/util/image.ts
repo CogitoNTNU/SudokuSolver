@@ -5,9 +5,10 @@ import { SudokuApplication, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAG
 import { sortPointsRadially } from "./sort"
 
 
-export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasElement, application: SudokuApplication, transformedCanvas: HTMLCanvasElement, solutionCanvas: HTMLCanvasElement, transformedSolutionCanvas: HTMLCanvasElement) {
+export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasElement, application: SudokuApplication, transformedCanvas: HTMLCanvasElement, solutionCanvas: HTMLCanvasElement, transformedSolutionCanvas: HTMLCanvasElement, batchCanvas: HTMLCanvasElement) {
     const ctx = canvas.getContext("2d")
-    if (!ctx) {
+    const bctx = batchCanvas.getContext("2d")
+    if (!ctx || !bctx) {
         throw new Error("Could not get context from canvas")
     }
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
@@ -27,7 +28,28 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
         transformImgSection(img, transformedImg, flatPoints, [0, 0, transformedCanvas.width, 0, transformedCanvas.height, transformedCanvas.width, 0, transformedCanvas.height], new cv.Size(transformedCanvas.width, transformedCanvas.height))
         cv.imshow(transformedCanvas, transformedImg)
 
-        const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(img)
+        const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(transformedImg)
+        const imgData = new ImageData(NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH, NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT)
+        let index = 0
+        for (let w = 0; w < 9; w++) {
+            for (let y = 0; y < 28; y++) {
+                for (let x = 0; x < 9; x ++) {
+                    for (let z = 0; z < 28; z++) {
+                        const i =  batchImagesArray[w*7056 + x*28*28 + z + y*28]
+                        const j = Math.floor(i * 255)
+                        imgData.data[index] = j
+                        imgData.data[index+1] = j
+                        imgData.data[index+2] = j
+                        imgData.data[index+3] = 255
+                        index += 4
+                    } 
+                }
+            }
+        }
+
+        batchCanvas.width = NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH
+        batchCanvas.height = NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT
+        bctx.putImageData(imgData, 0, 0)
 
         const batchImagesTensor = tensor2d(batchImagesArray, [indices.length, NUMBER_IMAGE_SIZE])
         const predictionData = batchImagesTensor.reshape([indices.length, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, 1])
@@ -41,8 +63,8 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
                 for (let i = 0; i < indices.length; i++) {
                     let bestGuess = 0
                     let bestProbabilty = 0
-                    for (let j = 0; j < 10; j++) {
-                        const probabilty = data[i*10+j]
+                    for (let j = 0; j < 9; j++) {
+                        const probabilty = data[i*9+j]
                         if (probabilty > bestProbabilty) {
                             bestGuess = j
                             bestProbabilty = probabilty
@@ -126,8 +148,6 @@ export function transformImgSection(src: cv.Mat, dst: cv.Mat, inputPoints: numbe
     const inputMat = cv.matFromArray(4, 1, cv.CV_32FC2, inputPoints)
     const outputMat = cv.matFromArray(4, 1, cv.CV_32FC2, outputPoints)
     const transformationMatrix = cv.getPerspectiveTransform(inputMat, outputMat)
-
-    const a = outputPoints.reduce((prev, curr) => Math.max(prev, curr), 0)
 
     cv.warpPerspective(src, dst, transformationMatrix, dSize)
 

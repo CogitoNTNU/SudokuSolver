@@ -8,7 +8,6 @@ export interface SudokuApplication {
     sudokuState: SudokuState,
     setSudokuState: Dispatch<SetStateAction<SudokuState>>
     model: LayersModel | null,
-    setModel: Dispatch<SetStateAction<LayersModel | null>>,
     sudoku: Uint8Array,
     probability: Float32Array,
     solution: Uint8Array
