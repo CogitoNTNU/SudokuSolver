@@ -8,12 +8,10 @@ WORKDIR /website
 COPY website/package*.json ./
 
 # Run the command inside your image filesystem
-RUN npm i
+RUN npm ci
 
 # Copy next.js source code
 COPY /website .
 
-EXPOSE 3000
-
-# Run the specified command within the container.
-RUN npx next dev
+# Specify the command to run the Next.js development server
+CMD ["npm", "run", "dev"]
