@@ -25,7 +25,7 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
         sortPointsRadially(sudokuCorners)
         const flatPoints = sudokuCorners.flat()
         const transformedImg = new cv.Mat()
-        transformImgSection(img, transformedImg, flatPoints, [0, 0, transformedCanvas.width, 0, transformedCanvas.height, transformedCanvas.width, 0, transformedCanvas.height], new cv.Size(transformedCanvas.width, transformedCanvas.height))
+        transformImgSection(img, transformedImg, flatPoints, [0, 0, transformedCanvas.width, 0, transformedCanvas.width, transformedCanvas.height, 0, transformedCanvas.height], new cv.Size(transformedCanvas.width, transformedCanvas.height))
         cv.imshow(transformedCanvas, transformedImg)
 
         const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(transformedImg)
@@ -51,38 +51,40 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
         batchCanvas.height = NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT
         bctx.putImageData(imgData, 0, 0)
 
-        const prediction = predictBatchImages(batchImagesArray, application.model, indices.length);
-
-        (async () => {
-            const data = await prediction.data()
-
-            for (let i = 0; i < indices.length; i++) {
-                let bestGuess = 0
-                let bestProbabilty = 0
-                for (let j = 0; j < 9; j++) {
-                    const probabilty = data[i*9+j]
-                    if (probabilty > bestProbabilty) {
-                        bestGuess = j
-                        bestProbabilty = probabilty
+        if (indices.length) {
+            const prediction = predictBatchImages(batchImagesArray, application.model, indices.length);
+    
+            (async () => {
+                const data = await prediction.data()
+    
+                for (let i = 0; i < indices.length; i++) {
+                    let bestGuess = 0
+                    let bestProbabilty = 0
+                    for (let j = 0; j < 9; j++) {
+                        const probabilty = data[i*9+j]
+                        if (probabilty > bestProbabilty) {
+                            bestGuess = j
+                            bestProbabilty = probabilty
+                        }
+                    }
+                    if (bestProbabilty > application.probability[i]) {
+                        application.sudoku[indices[i]] = bestGuess
+                        application.probability[indices[i]] = bestProbabilty
                     }
                 }
-                if (bestProbabilty > application.probability[i]) {
-                    application.sudoku[indices[i]] = bestGuess
-                    application.probability[indices[i]] = bestProbabilty
-                }
-            }
-            drawSolutionOnCanvas(application.sudoku, solutionCanvas)
-
-            const solutionImg = cv.imread(solutionCanvas)
-            const transformedSolutionImg = new cv.Mat()
-            const solutionCorners = [0, 0, solutionImg.cols, 0, solutionImg.cols, solutionImg.rows, 0, solutionImg.rows] 
-            transformImgSection(solutionImg, transformedSolutionImg, solutionCorners, sudokuCorners.flat(), new cv.Size(video.videoWidth, video.videoHeight))
-            
-            cv.imshow(transformedSolutionCanvas, transformedSolutionImg)
-            solutionImg.delete()
-            transformedSolutionImg.delete()
-
-        })()
+                drawSolutionOnCanvas(application.sudoku, solutionCanvas)
+    
+                const solutionImg = cv.imread(solutionCanvas)
+                const transformedSolutionImg = new cv.Mat()
+                const solutionCorners = [0, 0, solutionImg.cols, 0, solutionImg.cols, solutionImg.rows, 0, solutionImg.rows] 
+                transformImgSection(solutionImg, transformedSolutionImg, solutionCorners, flatPoints, new cv.Size(video.videoWidth, video.videoHeight))
+                
+                cv.imshow(transformedSolutionCanvas, transformedSolutionImg)
+                solutionImg.delete()
+                transformedSolutionImg.delete()
+    
+            })()
+        }
 
         
         transformedImg.delete()
@@ -191,11 +193,11 @@ export function sudokuImgToBatchImagesArray(img: cv.Mat): [Float32Array, number[
         for (let x = 0; x < SUDOKU_WIDTH; x++) {
             const rect = resizedImg.roi(new cv.Rect(x*NUMBER_IMAGE_WIDTH,y*NUMBER_IMAGE_HEIGHT,NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT))
             
-            setBorder(rect, 3, 0)
+            setBorder(rect, 5, 0)
             cv.dilate(rect, rect, dilateKernel)
 
             const mean = cv.mean(rect)[0]
-            const thresh = mean + 60
+            const thresh = mean + 70
             filter(rect, rect, thresh, 255)
             
             if (cv.mean(rect)[0] < 5) {

@@ -10,10 +10,10 @@ RUN npm ci
 
 COPY /website/prisma ./prisma
 
-# RUN npx prisma generate
+RUN npx prisma generate
 
 # Copy source code
-COPY website/ .
+COPY /website/ .
 
 # Specify the command to run the Next.js development server
 # CMD ["npm", "run", "dev"]
