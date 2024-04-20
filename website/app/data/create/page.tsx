@@ -6,15 +6,14 @@ import { CameraState } from "@/app/components/Camera/Types"
 import cv from "@techstark/opencv-js"
 import { getCorners, sudokuImgToBatchImagesArray, transformImgSection } from "@/app/util/image"
 import { sortPointsRadially } from "@/app/util/sort"
-import { NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_WIDTH, SUDOKU_WIDTH, SUDOKU_HEIGHT, NUMBER_IMAGE_SIZE } from "@/app/context/sudokuApplication/Types"
-
+import { NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_WIDTH, SUDOKU_WIDTH, SUDOKU_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_SIZE } from "@/app/context/sudokuApplication/Types"
+import Link from "next/link"
 
 export default function Page() {
     const videoRef = useRef<HTMLVideoElement | null>(null)
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
     const [cameraState, setCameraState] = useState<CameraState>(CameraState.Off)
-    const [length, setLength] = useState<number>(0)
 
     const callbackFunction = useCallback(() => {
         const canvas = canvasRef.current
@@ -32,19 +31,19 @@ export default function Page() {
                 console.log(corners)
                 if (corners) {
                     sortPointsRadially(corners)
-                    const a = 3
-                    corners[0][0] += a
-                    corners[0][1] += a
-                    corners[1][0] -= a
-                    corners[1][1] += a
-                    corners[2][0] -= a
-                    corners[2][1] -= a
-                    corners[3][0] += a
-                    corners[3][1] -= a
+                    // const a = 3
+                    // corners[0][0] += a
+                    // corners[0][1] += a
+                    // corners[1][0] -= a
+                    // corners[1][1] += a
+                    // corners[2][0] -= a
+                    // corners[2][1] -= a
+                    // corners[3][0] += a
+                    // corners[3][1] -= a
                     transformImgSection(img, img, corners.flat(), [0, 0, canvas.width, 0, canvas.width, canvas.height, 0, canvas.height], new cv.Size(canvas.width, canvas.height))
                     cv.imshow(canvas, img)
 
-                    const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(img)
+                    const batchImagesArray = sudokuImgToBatchImagesArray(img)
                     
                     const imgData = new ImageData(NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH, NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT)
                     let index = 0
@@ -66,10 +65,6 @@ export default function Page() {
                     canvas.width = SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH
                     canvas.height = SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT
                     ctx.putImageData(imgData, 0, 0)
-                    setLength(indices.length)
-                }
-                else {
-                    setLength(0)
                 }
 
                 img.delete()
@@ -80,6 +75,9 @@ export default function Page() {
 
     return (
         <div>
+            <Link href={"/data"}>
+                <button>Se på data</button>
+            </Link>
             <CameraFeed videoRef={videoRef} cameraState={cameraState} setCameraState={setCameraState} callbackFunction={callbackFunction}/>
             {
                 cameraState == CameraState.Off 
@@ -94,14 +92,17 @@ export default function Page() {
                 if (canvas) {
                     const ctx = canvas.getContext("2d")
                     if (ctx) {
-                        for (let i = 0; i < length; i++) {
+                        for (let i = 0; i < SUDOKU_SIZE; i++) {
                             const x = i%SUDOKU_WIDTH
                             const y = Math.floor(i/SUDOKU_WIDTH)
-                            const pixeldata = ctx.getImageData(x, y, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT).data
+                            const pixeldata = ctx.getImageData(x*NUMBER_IMAGE_WIDTH, y*NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT).data
                             const data = new Uint8Array(NUMBER_IMAGE_SIZE)
                             for (let j = 0; j < NUMBER_IMAGE_SIZE; j++) {
-                                data[i] = pixeldata[j*4]
+                                data[j] = pixeldata[j*4]
                             }
+                            console.log(pixeldata)
+                            console.log(data)
+                            console.log(Buffer.from(data));
 
                             (async ()=> {
                                 const response = await fetch("../api/image/create", {
@@ -118,7 +119,6 @@ export default function Page() {
 
                     }
                 }
-                console.log(length)
             }}>Upload</button>
         </div>
     )
