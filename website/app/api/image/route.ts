@@ -9,17 +9,26 @@ export async function GET(request: Request) {
         return new Response(JSON.stringify(images))
     }
     
-    if (params.has("id")) {
-        const id = params.get("id")
-        if (id) {
-            const image = await prisma.image.findUnique({
+    const id = params.get("id")
+
+    if (id) {
+        if (params.has("gt")) {
+            const image = await prisma.image.findFirst({
                 where: {
-                    id: parseInt(id)
+                    id: { gt: parseInt(id) },
+                    OR: [
+                        { label: { equals: 255 } },
+                        { label: { equals: null } }
+                    ]
                 }
             })
             return new Response(JSON.stringify(image))
         }
+        const image = await prisma.image.findUnique({
+            where: {
+                id: parseInt(id)
+            }
+        })
+        return new Response(JSON.stringify(image))
     }
-
-    console.log(request.body)
 }

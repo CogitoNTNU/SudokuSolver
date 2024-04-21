@@ -11,6 +11,7 @@ const labels = new Uint8Array(labelBinary)
 const digits = new Uint8Array(digitsBinary)
 
 labels.forEach(async (label, i) => {
+    console.log(label)
     const result = await prisma.image.create({
         data: {
             label,

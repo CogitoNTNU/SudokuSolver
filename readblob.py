@@ -3,16 +3,17 @@ import matplotlib.pyplot as plt
 
 
 size = 28*28
-n = 9
+n = 4
 
 
-with open("labels", "rb") as file:
+with open("labels.bin", "rb") as file:
     blob = file.read()
     data = np.frombuffer(blob, dtype=np.uint8)
     print(data[n])
+    print(data)
 
 
-with open("digits", "rb") as file:
+with open("digits.bin", "rb") as file:
     blob = file.read()
     data = np.frombuffer(blob, dtype=np.uint8)
     img = data[n*size:(n+1)*size]

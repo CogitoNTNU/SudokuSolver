@@ -7,39 +7,42 @@ import { useCallback, useEffect, useRef, useState } from "react"
 export default function Page() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const [id, setId] = useState(0)
+    const [labelVal, setLabelVal] = useState(0)
 
     const handleKeyPress = useCallback(async (event: KeyboardEvent) => {
-        console.log(event)
-        const label = parseInt(event.key)
-        const response = await fetch(`/api/image/update?id=${id}&label=${label}`, {
-            method: "GET"
+        let label = parseInt(event.key)
+        fetch(`/api/image/update?id=${id}&label=${label}`, {
+            method: "POST"
         })
-        console.log(response)
-        const newId = id+1
-        setId(newId)
-        displayImage(newId)
-    }, [id])
-
-    async function displayImage(n: number) {
-        const response = await fetch(`/api/image?id=${n}`, {
+        const response = await fetch(`/api/image?id=${id}&gt=true`, {
             method: "GET"
         })
         if (response.ok) {
-            const result = await response.json()
-            const data = result.data.data
-            const imgData = new ImageData(NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT)
-            for (let i = 0; i < NUMBER_IMAGE_SIZE; i++) {
-                imgData.data[i*4] = data[i]
-                imgData.data[i*4+1] = data[i]
-                imgData.data[i*4+2] = data[i]
-                imgData.data[i*4+3] = 255
-            }
-            const canvas = canvasRef.current
-            if (canvas) {
-                const ctx = canvas.getContext("2d")
-                if (ctx) {
-                    ctx.putImageData(imgData, 0, 0)
-                }
+            (async () => {
+                const result = await response.json()
+                displayImage(result)
+                console.log(result)
+                setId(result.id)
+            })()
+        }
+    }, [id])
+
+    async function displayImage(result: {data: {data: Buffer}, label: number}) {
+        const data = result.data.data
+        const label = result.label
+        setLabelVal(label ? label : 255)
+        const imgData = new ImageData(NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT)
+        for (let i = 0; i < NUMBER_IMAGE_SIZE; i++) {
+            imgData.data[i*4] = data[i]
+            imgData.data[i*4+1] = data[i]
+            imgData.data[i*4+2] = data[i]
+            imgData.data[i*4+3] = 255
+        }
+        const canvas = canvasRef.current
+        if (canvas) {
+            const ctx = canvas.getContext("2d")
+            if (ctx) {
+                ctx.putImageData(imgData, 0, 0)
             }
         }
     }
@@ -49,7 +52,7 @@ export default function Page() {
         return () => {
             document.removeEventListener("keydown", handleKeyPress)
         }
-    }, [])
+    }, [handleKeyPress])
 
     return (
         <>
@@ -62,7 +65,6 @@ export default function Page() {
                 })
                 if (response.ok) {
                     const result = await response.json()
-                    console.log(result)
                     const digitsData = new Uint8Array(result.length*NUMBER_IMAGE_SIZE)
                     const labelData = new Uint8Array(result.length)
 
@@ -82,7 +84,7 @@ export default function Page() {
 
                     const link = document.createElement('a')
                     link.href = labelsUrl
-                    link.download = "labels"
+                    link.download = "labels.bin"
 
                     document.body.appendChild(link)
                     link.click()
@@ -93,7 +95,7 @@ export default function Page() {
                     const digitsUrl = URL.createObjectURL(digitsBlob)
 
                     link.href = digitsUrl
-                    link.download = "digits"
+                    link.download = "digits.bin"
 
                     link.click()
 
@@ -103,13 +105,21 @@ export default function Page() {
             }}>Last ned data</button>
             <input type="number" value={id} onChange={async event => {
                 const val = parseInt(event.target.value)
-                console.log("###", val, id)
                 if (val != id) {
                     setId(val)
-                    displayImage(val)
+                    const response = await fetch(`/api/image?id=${val}`, {
+                        method: "GET"
+                    })
+                    if (response.ok) {
+                        (async () => {
+                            const result = await response.json()
+                            displayImage(result)
+                        })()
+                    }
                 }
             }}/>
             <canvas ref={canvasRef} width={28} height={28}></canvas>
+            <p>{labelVal}</p>
         </>
     )
 }
