@@ -56,21 +56,7 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
         (async () => {
             const data = await prediction.data()
 
-            for (let i = 0; i < SUDOKU_SIZE; i++) {
-                let bestGuess = 0
-                let bestProbabilty = 0
-                for (let j = 0; j < NUM_CLASSES; j++) {
-                    const probabilty = data[i*NUM_CLASSES+j]
-                    if (probabilty > bestProbabilty) {
-                        bestGuess = j
-                        bestProbabilty = probabilty
-                    }
-                }
-                if (bestProbabilty > application.probability[i]) {
-                    application.sudoku[i] = bestGuess + 1
-                    application.probability[i] = bestProbabilty  
-                }
-            }
+            application.sudoku = predictionToSudoku(data, indices)
             drawSolutionOnCanvas(application.sudoku, solutionCanvas)
 
             const solutionImg = cv.imread(solutionCanvas)
@@ -152,7 +138,7 @@ export function transformImgSection(src: cv.Mat, dst: cv.Mat, inputPoints: numbe
 }
 
 
-export function drawSolutionOnCanvas(solution: Uint8Array, canvas: HTMLCanvasElement) {
+export function drawSolutionOnCanvas(solution: number[][], canvas: HTMLCanvasElement) {
     const ctx = canvas.getContext("2d")
     if (!ctx) {
         console.error("Could not get 2d context from canvas")
@@ -165,9 +151,11 @@ export function drawSolutionOnCanvas(solution: Uint8Array, canvas: HTMLCanvasEle
     ctx.fillStyle = "black"
     ctx.font = `${size}px monospace`;
 
-    for (let i = 0; i < SUDOKU_SIZE; i++) {
-        if (solution[i] != 0) {
-            ctx.fillText(solution[i].toString(), size * (i % 9) + size * 0.2, size * (Math.floor(i / 9) + 1) - size * 0.1)
+    for (let y = 0; y < SUDOKU_HEIGHT; y++) {
+        for (let x = 0; x < SUDOKU_WIDTH; x++) {
+            if (solution[y][x] != 0)
+                ctx.fillText(solution[y][x].toString(), size * x + size * 0.2, size * (y+1) - size * 0.1)
+
         }
     }
 }
