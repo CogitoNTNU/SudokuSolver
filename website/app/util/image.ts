@@ -242,7 +242,7 @@ export function setBorder(img: cv.Mat, borderSize: number, val: number) {
 export function predictionToSudoku(prediction: Uint8Array): number[][] {
     let sudoku = Array(9).fill(0).map(_ => Array(9).fill(0))
 
-    for (let i = 0; i < prediction.length; i++) {
+    for (let i = 0; i < prediction.length; i += 10) {
 
         // Find index of max value
         let max_i = i;
@@ -258,7 +258,7 @@ export function predictionToSudoku(prediction: Uint8Array): number[][] {
         let index = ~~(i / 10)
         let row = ~~(index / 9)
         let col = index % 9
-        sudoku[row][col] = max_i
+        sudoku[row][col] = max_i % 10
     }
 
     return sudoku

@@ -5,7 +5,7 @@ import CameraButton from "../Camera/CameraButton"
 import { useRef, useEffect, useCallback } from "react"
 import cv from "@techstark/opencv-js"
 import { CameraState } from "../Camera/Types" 
-import { drawVideoOnCanvas } from "../../util/image" 
+import { drawVideoOnCanvas, predictionToSudoku } from "../../util/image" 
 import { useSudokuApplicationContext } from "../../context/sudokuApplication/SudokuApplication"
 import { loadLayersModel } from "@tensorflow/tfjs"
 import { sudokuImgToBatchImagesArray } from "../../util/image"
@@ -84,7 +84,9 @@ export default function SudokuApplicationElement() {
             
             (async () => {
                 const data = await prediction.data()
+                const formated = predictionToSudoku(data)
                 console.log(data)
+                console.log(formated)
             })()
             const imgData = new ImageData(NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH, NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT)
             let index = 0
