@@ -53,15 +53,14 @@ function btnClick() {
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
     
     const img = cv.imread(canvas)
-    const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(img)
+    const batchImagesArray = sudokuImgToBatchImagesArray(img)
     img.delete()
 
-    const prediction = predictBatchImages(batchImagesArray, model, indices.length);
+    const prediction = predictBatchImages(batchImagesArray, model, SUDOKU_SIZE);
 
     (async () => {
         const data = await prediction.data()
-        const formated = formatPredictionData(data, indices)
-        console.log(formated)
+        console.log(data)
     })()
     
     const imgData = new ImageData(NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH, NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT)
@@ -119,7 +118,7 @@ return (
                 const img = cv.imread(canvas)
                 cv.resize(img, img, new cv.Size(SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH, SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT))
                 cv.imshow(canvas, img)
-                const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(img)
+                const batchImagesArray = sudokuImgToBatchImagesArray(img)
                 img.delete()
                 const section = batchImagesArray.slice(NUMBER_IMAGE_SIZE*value, NUMBER_IMAGE_SIZE*(value+1))
     
@@ -157,7 +156,7 @@ return (
             const img = cv.imread(canvas)
             cv.resize(img, img, new cv.Size(SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH, SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT))
             cv.imshow(canvas, img)
-            const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(img)
+            const batchImagesArray = sudokuImgToBatchImagesArray(img)
             img.delete()
             const section = batchImagesArray.slice(NUMBER_IMAGE_SIZE*input, NUMBER_IMAGE_SIZE*(input+1))
 
@@ -172,7 +171,7 @@ return (
 
             dctx.putImageData(imgData, 0, 0)
 
-            const prediction = predictBatchImages(batchImagesArray, model, indices.length);
+            const prediction = predictBatchImages(batchImagesArray, model, SUDOKU_SIZE);
 
             (async () => {
                 const data = await prediction.data()
