@@ -59,8 +59,8 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
             for (let i = 0; i < SUDOKU_SIZE; i++) {
                 let bestGuess = 0
                 let bestProbabilty = 0
-                for (let j = 0; j < 9; j++) {
-                    const probabilty = data[i*9+j]
+                for (let j = 0; j < 10; j++) {
+                    const probabilty = data[i*10+j]
                     if (probabilty > bestProbabilty) {
                         bestGuess = j
                         bestProbabilty = probabilty

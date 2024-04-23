@@ -36,8 +36,12 @@ with open(digits_path, "rb") as f:
 
 
 # Remove some zeroes
-num_zeroes = sum(map(lambda l: not (l), labels))
-target_zeroes = num_zeroes // 2
+num_zeroes = len(labels[np.where(labels == 0)])
+# print(num_zeroes)
+for i in range(10):
+    print(i, len(labels[np.where(labels == i)]))
+
+target_zeroes = num_zeroes // 11
 
 digits_temp = np.empty((num_images - target_zeroes, 28, 28))
 labels_temp = np.empty((num_images - target_zeroes))

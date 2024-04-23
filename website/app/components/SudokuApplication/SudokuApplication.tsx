@@ -34,7 +34,7 @@ export default function SudokuApplicationElement() {
     
 
     const loadModel = useCallback(() => {
-        loadLayersModel('/models/tfjs_model/model.json').then(loadedModel => {
+        loadLayersModel('/models/new_model/model.json').then(loadedModel => {
             application.model = loadedModel
             console.log("model loaded")
         })
@@ -49,9 +49,10 @@ export default function SudokuApplicationElement() {
         navigator.mediaDevices.enumerateDevices().then((devices) => {
             const cameras = devices.filter(device => device.kind === 'videoinput')
             cameras.forEach(camera => {
-              console.log('Camera label:', camera.label)
-              console.log('Camera ID:', camera.deviceId)
-              console.log('Camera group ID:', camera.groupId)
+                console.log(camera)
+                // console.log('Camera label:', camera.label)
+                // console.log('Camera ID:', camera.deviceId)
+                // console.log('Camera group ID:', camera.groupId)
             })
         })
 
