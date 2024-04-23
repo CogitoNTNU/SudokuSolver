@@ -2,6 +2,9 @@
   "name": "website",
   "version": "0.1.0",
   "private": true,
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seeding/seed.ts"
+  },
   "scripts": {
     "dev": "next dev --experimental-https",
     "build": "next build",
@@ -9,6 +12,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@prisma/client": "^5.12.1",
     "@techstark/opencv-js": "^4.9.0-release.3",
     "@tensorflow/tfjs": "^4.17.0",
     "@tensorflow/tfjs-node": "^4.17.0",
@@ -17,12 +21,14 @@
     "react-dom": "^18"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^20.12.7",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
+    "prisma": "^5.12.1",
     "sass": "^1.71.1",
-    "typescript": "^5"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
   }
 }

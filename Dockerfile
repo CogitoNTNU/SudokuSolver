@@ -1,17 +1,19 @@
-# Use the official image as a parent image
-FROM node:20 
+FROM node:20-alpine
 
-# Set the working directory
 WORKDIR /website
 
 # Copy npm package files
 COPY website/package*.json ./
 
-# Run the command inside your image filesystem
+# install dependencies
 RUN npm ci
 
-# Copy next.js source code
-COPY /website .
+COPY /website/prisma ./prisma
+
+RUN npx prisma generate
+
+# Copy source code
+COPY /website/ .
 
 # Specify the command to run the Next.js development server
-CMD ["npm", "run", "dev"]
+# CMD ["npm", "run", "dev"]
