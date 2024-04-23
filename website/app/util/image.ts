@@ -16,7 +16,7 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
     if (canvas.width == 0 || canvas.height == 0) {
         return
     }
-    
+
     const img = cv.imread(canvas)
     const sudokuCorners = getCorners(img, canvas)
 
@@ -33,16 +33,16 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
         let index = 0
         for (let w = 0; w < 9; w++) {
             for (let y = 0; y < 28; y++) {
-                for (let x = 0; x < 9; x ++) {
+                for (let x = 0; x < 9; x++) {
                     for (let z = 0; z < 28; z++) {
-                        const i =  batchImagesArray[w*7056 + x*28*28 + z + y*28]
+                        const i = batchImagesArray[w * 7056 + x * 28 * 28 + z + y * 28]
                         const j = Math.floor(i * 255)
                         imgData.data[index] = j
-                        imgData.data[index+1] = j
-                        imgData.data[index+2] = j
-                        imgData.data[index+3] = 255
+                        imgData.data[index + 1] = j
+                        imgData.data[index + 2] = j
+                        imgData.data[index + 3] = 255
                         index += 4
-                    } 
+                    }
                 }
             }
         }
@@ -52,7 +52,7 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
         bctx.putImageData(imgData, 0, 0)
 
         const prediction = predictBatchImages(batchImagesArray, application.model, SUDOKU_SIZE);
-    
+
         (async () => {
             const data = await prediction.data()
 
@@ -60,7 +60,7 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
                 let bestGuess = 0
                 let bestProbabilty = 0
                 for (let j = 0; j < 9; j++) {
-                    const probabilty = data[i*9+j]
+                    const probabilty = data[i * 9 + j]
                     if (probabilty > bestProbabilty) {
                         bestGuess = j
                         bestProbabilty = probabilty
@@ -75,16 +75,16 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
 
             const solutionImg = cv.imread(solutionCanvas)
             const transformedSolutionImg = new cv.Mat()
-            const solutionCorners = [0, 0, solutionImg.cols, 0, solutionImg.cols, solutionImg.rows, 0, solutionImg.rows] 
+            const solutionCorners = [0, 0, solutionImg.cols, 0, solutionImg.cols, solutionImg.rows, 0, solutionImg.rows]
             transformImgSection(solutionImg, transformedSolutionImg, solutionCorners, flatPoints, new cv.Size(video.videoWidth, video.videoHeight))
-            
+
             cv.imshow(transformedSolutionCanvas, transformedSolutionImg)
             solutionImg.delete()
             transformedSolutionImg.delete()
 
         })()
 
-        
+
         transformedImg.delete()
     }
 
@@ -121,7 +121,7 @@ export function getCorners(img: cv.Mat, canvas: HTMLCanvasElement): number[][] |
         }
         cnt.delete()
     }
-    cv.imshow(canvas, outputImg)    
+    cv.imshow(canvas, outputImg)
     outputImg.delete()
     contours.delete()
     hierarchy.delete()
@@ -129,13 +129,13 @@ export function getCorners(img: cv.Mat, canvas: HTMLCanvasElement): number[][] |
     if (bestApprox) {
         const points: number[][] = []
         for (let i = 0; i < bestApprox.rows; i++) {
-            points.push([bestApprox.data32S[i*2], bestApprox.data32S[i*2 + 1]])
+            points.push([bestApprox.data32S[i * 2], bestApprox.data32S[i * 2 + 1]])
         }
         bestApprox.delete()
         return points
     } else {
         return null
-    }   
+    }
 }
 
 
@@ -156,7 +156,7 @@ export function drawSolutionOnCanvas(solution: Uint8Array, canvas: HTMLCanvasEle
     const ctx = canvas.getContext("2d")
     if (!ctx) {
         console.error("Could not get 2d context from canvas")
-        return 
+        return
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -167,7 +167,7 @@ export function drawSolutionOnCanvas(solution: Uint8Array, canvas: HTMLCanvasEle
 
     for (let i = 0; i < SUDOKU_SIZE; i++) {
         if (solution[i] != 0) {
-            ctx.fillText(solution[i].toString(), size*(i%9) + size*0.2, size*(Math.floor(i/9)+1) -size*0.1)
+            ctx.fillText(solution[i].toString(), size * (i % 9) + size * 0.2, size * (Math.floor(i / 9) + 1) - size * 0.1)
         }
     }
 }
@@ -177,7 +177,7 @@ export function sudokuImgToBatchImagesArray(img: cv.Mat): Float32Array {
     const batchImagesArray = new Float32Array(SUDOKU_SIZE * NUMBER_IMAGE_SIZE)
 
     const resizedImg = new cv.Mat()
-    cv.resize(img, resizedImg, new cv.Size(SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH, SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT))
+    cv.resize(img, resizedImg, new cv.Size(SUDOKU_WIDTH * NUMBER_IMAGE_WIDTH, SUDOKU_HEIGHT * NUMBER_IMAGE_HEIGHT))
 
     cv.cvtColor(resizedImg, resizedImg, cv.COLOR_BGR2GRAY)
     cv.bitwise_not(resizedImg, resizedImg)
@@ -186,32 +186,32 @@ export function sudokuImgToBatchImagesArray(img: cv.Mat): Float32Array {
     const dilateKernel = cv.Mat.ones(dilateKernelSize, dilateKernelSize, cv.CV_8U)
 
     // const indices: number[] = []
-    
+
     for (let y = 0; y < SUDOKU_HEIGHT; y++) {
         for (let x = 0; x < SUDOKU_WIDTH; x++) {
-            const rect = resizedImg.roi(new cv.Rect(x*NUMBER_IMAGE_WIDTH,y*NUMBER_IMAGE_HEIGHT,NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT))
-            
+            const rect = resizedImg.roi(new cv.Rect(x * NUMBER_IMAGE_WIDTH, y * NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT))
+
             setBorder(rect, 5, 0)
             cv.dilate(rect, rect, dilateKernel)
 
             const mean = cv.mean(rect)[0]
             const thresh = mean + 60
             filter(rect, rect, thresh, 255)
-            
+
             if (cv.mean(rect)[0] < 5) {
                 rect.delete()
                 continue
             }
-            
+
             rect.convertTo(rect, cv.CV_32F, 1 / 255)
-            batchImagesArray.set(rect.data32F, (y*SUDOKU_WIDTH+x)*NUMBER_IMAGE_SIZE)
+            batchImagesArray.set(rect.data32F, (y * SUDOKU_WIDTH + x) * NUMBER_IMAGE_SIZE)
             // batchImagesArray.set(rect.data32F, indices.length*NUMBER_IMAGE_SIZE)
             // indices.push(y*SUDOKU_WIDTH+x)
-            
+
             rect.delete()
         }
     }
-    
+
     dilateKernel.delete()
     resizedImg.delete()
     return batchImagesArray
@@ -237,4 +237,26 @@ export function setBorder(img: cv.Mat, borderSize: number, val: number) {
     img.roi(bottomROI).setTo(new cv.Scalar(val))
     img.roi(leftROI).setTo(new cv.Scalar(val))
     img.roi(rightROI).setTo(new cv.Scalar(val))
+}
+
+export function predictionToSudoku(prediction: Uint8Array): number[] {
+    let sudoku = Array(~~(prediction.length / 10)).fill(0)
+
+    for (let i = 0; i < prediction.length; i++) {
+
+        // Find index of max value
+        let max_i = i;
+        let max_val = prediction[i];
+        for (let j = i + 1; j < i + 10; j++) {
+            if (prediction[j] > max_val) {
+                max_val = prediction[j]
+                max_i = j
+            }
+        }
+
+        // Add index to sudoku
+        sudoku[~~(i / 10)] = max_i
+    }
+
+    return sudoku
 }
