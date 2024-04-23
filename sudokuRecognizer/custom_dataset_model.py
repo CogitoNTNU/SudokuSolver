@@ -35,23 +35,10 @@ with open(digits_path, "rb") as f:
         digits[n] = img
 
 
-# Remove some zeroes
-num_zeroes = sum(map(lambda l: not (l), labels))
-target_zeroes = num_zeroes // 2
-
-digits_temp = np.empty((num_images - target_zeroes, 28, 28))
-labels_temp = np.empty((num_images - target_zeroes))
-
-zeroes = 0
-j = 0
-for i in range(num_images):
-    if (labels[i] == 0):
-        if (zeroes >= target_zeroes):
-            continue
-        zeroes += 1
-    labels_temp[j] = labels[i]
-    digits_temp[j] = digits[i]
-    j += 1
+# Remove all zeroes
+zero_mask = np.where(labels != 0)
+labels = labels[zero_mask]
+digits = digits[zero_mask]
 
 # Split into train and test
 (x_train, y_train), (x_test, y_test) = split_data(digits, labels)
@@ -89,7 +76,7 @@ model.add(Dropout(0.25))
 model.add(Dense(1024, activation='relu'))
 model.add(BatchNormalization())
 model.add(Dropout(0.5))
-model.add(Dense(10, activation='softmax'))
+model.add(Dense(9, activation='softmax'))
 
 # Compile model
 model.compile(optimizer="adam", loss="categorical_crossentropy",
@@ -97,7 +84,7 @@ model.compile(optimizer="adam", loss="categorical_crossentropy",
 
 # Fit model
 model.fit(x_train, y_train, validation_data=(x_test, y_test),
-          batch_size=20, epochs=50, verbose=1)  # train model
+          batch_size=20, epochs=1, verbose=1)  # train model
 
 
 # Save model
