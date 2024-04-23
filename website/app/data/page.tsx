@@ -18,6 +18,7 @@ export default function Page() {
 
     const handleKeyPress = useCallback(async (event: KeyboardEvent) => {
         let label = parseInt(event.key)
+        if (isNaN(label)) return;
         fetch(`/api/image/update?id=${id}&label=${label}`, {
             method: "POST"
         })
