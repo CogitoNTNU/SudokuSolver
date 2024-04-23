@@ -248,7 +248,7 @@ export function predictionToSudoku(prediction: Uint8Array): number[][] {
         // Find index of max value
         let max_i = i;
         let max_val = prediction[i];
-        for (let j = i + 1; j < i + 10; j++) {
+        for (let j = i + 1; j < i + NUM_CLASSES; j++) {
             if (prediction[j] > max_val) {
                 max_val = prediction[j]
                 max_i = j
@@ -256,7 +256,7 @@ export function predictionToSudoku(prediction: Uint8Array): number[][] {
         }
 
         // Add index to sudoku
-        let index = ~~(i / 10)
+        let index = ~~(i / NUM_CLASSES)
         let row = ~~(index / 9)
         let col = index % 9
         sudoku[row][col] = max_i % 10
