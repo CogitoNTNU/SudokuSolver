@@ -3,6 +3,7 @@ services:
  api:
   build:
    context: .
+   network: "host"
    dockerfile: Dockerfile
   volumes:
    - ./:/website
