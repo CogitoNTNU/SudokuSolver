@@ -11,5 +11,5 @@ datasource db {
 model Image {
   id    Int @id @default(autoincrement())
   data Bytes
-  label Int?
+  label Int
 }

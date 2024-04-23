@@ -6,7 +6,8 @@ export async function POST(request: Request) {
 
     const image = await prisma.image.create({
         data: {
-            data: Buffer.from(data)
+            data: Buffer.from(data),
+            label: 255
         }
     })
 

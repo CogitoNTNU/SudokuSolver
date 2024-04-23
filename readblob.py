@@ -3,17 +3,16 @@ import matplotlib.pyplot as plt
 
 
 size = 28*28
-n = 4
+n = 3
 
 
-with open("labels.bin", "rb") as file:
+with open("website/prisma/seeding/labels.bin", "rb") as file:
     blob = file.read()
     data = np.frombuffer(blob, dtype=np.uint8)
     print(data[n])
-    print(data)
 
 
-with open("digits.bin", "rb") as file:
+with open("website/prisma/seeding/digits.bin", "rb") as file:
     blob = file.read()
     data = np.frombuffer(blob, dtype=np.uint8)
     img = data[n*size:(n+1)*size]

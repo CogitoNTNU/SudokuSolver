@@ -195,7 +195,7 @@ export function sudokuImgToBatchImagesArray(img: cv.Mat): Float32Array {
             cv.dilate(rect, rect, dilateKernel)
 
             const mean = cv.mean(rect)[0]
-            const thresh = mean + 50
+            const thresh = mean + 60
             filter(rect, rect, thresh, 255)
             
             if (cv.mean(rect)[0] < 5) {
