@@ -6,7 +6,6 @@ import cv from "@techstark/opencv-js"
 import { NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_SIZE, SUDOKU_HEIGHT, SUDOKU_WIDTH, SUDOKU_SIZE } from "../context/sudokuApplication/Types"
 import { sudokuImgToBatchImagesArray } from "../util/image"
 import { predictBatchImages } from "../util/model"
-import { formatPredictionData } from "../util/model"
 
 
 export default function Page() {
@@ -19,7 +18,7 @@ const [input, setInput] = useState<number>(0)
 useEffect(() => {
     async function loadModel() {
         try {
-            const loadedModel = await loadLayersModel('/models/tfjs_model/model.json')
+            const loadedModel = await loadLayersModel('/models/new_model/model.json')
             setModel(loadedModel)
             console.log('Model loaded successfully')
         } 
