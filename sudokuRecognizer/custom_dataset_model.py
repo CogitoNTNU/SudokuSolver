@@ -56,6 +56,10 @@ for i in range(num_images):
     labels_temp[j] = labels[i]
     digits_temp[j] = digits[i]
     j += 1
+# Remove all zeroes
+zero_mask = np.where(labels != 0)
+labels = labels[zero_mask]
+digits = digits[zero_mask]
 
 # Split into train and test
 (x_train, y_train), (x_test, y_test) = split_data(digits, labels)
@@ -93,7 +97,7 @@ model.add(Dropout(0.25))
 model.add(Dense(1024, activation='relu'))
 model.add(BatchNormalization())
 model.add(Dropout(0.5))
-model.add(Dense(10, activation='softmax'))
+model.add(Dense(9, activation='softmax'))
 
 # Compile model
 model.compile(optimizer="adam", loss="categorical_crossentropy",

@@ -1,6 +1,6 @@
 "use client"
 import cv from "@techstark/opencv-js"
-import { SudokuApplication, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE } from "../context/sudokuApplication/Types"
+import { SudokuApplication, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE, NUM_CLASSES } from "../context/sudokuApplication/Types"
 import { predictBatchImages } from "./model"
 import { sortPointsRadially } from "./sort"
 
@@ -59,8 +59,8 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
             for (let i = 0; i < SUDOKU_SIZE; i++) {
                 let bestGuess = 0
                 let bestProbabilty = 0
-                for (let j = 0; j < 10; j++) {
-                    const probabilty = data[i*10+j]
+                for (let j = 0; j < NUM_CLASSES; j++) {
+                    const probabilty = data[i*NUM_CLASSES+j]
                     if (probabilty > bestProbabilty) {
                         bestGuess = j
                         bestProbabilty = probabilty
@@ -175,6 +175,7 @@ export function drawSolutionOnCanvas(solution: Uint8Array, canvas: HTMLCanvasEle
 
 export function sudokuImgToBatchImagesArray(img: cv.Mat): Float32Array {
     const batchImagesArray = new Float32Array(SUDOKU_SIZE * NUMBER_IMAGE_SIZE)
+    const indices = []
 
     const resizedImg = new cv.Mat()
     cv.resize(img, resizedImg, new cv.Size(SUDOKU_WIDTH * NUMBER_IMAGE_WIDTH, SUDOKU_HEIGHT * NUMBER_IMAGE_HEIGHT))
