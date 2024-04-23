@@ -1,6 +1,6 @@
 "use client"
 import cv from "@techstark/opencv-js"
-import { SudokuApplication, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE } from "../context/sudokuApplication/Types"
+import { SudokuApplication, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE, NUM_CLASSES } from "../context/sudokuApplication/Types"
 import { predictBatchImages } from "./model"
 import { sortPointsRadially } from "./sort"
 
@@ -247,7 +247,7 @@ export function predictionToSudoku(prediction: Uint8Array): number[][] {
         // Find index of max value
         let max_i = i;
         let max_val = prediction[i];
-        for (let j = i + 1; j < i + 10; j++) {
+        for (let j = i + 1; j < i + NUM_CLASSES; j++) {
             if (prediction[j] > max_val) {
                 max_val = prediction[j]
                 max_i = j
@@ -255,7 +255,7 @@ export function predictionToSudoku(prediction: Uint8Array): number[][] {
         }
 
         // Add index to sudoku
-        let index = ~~(i / 10)
+        let index = ~~(i / NUM_CLASSES)
         let row = ~~(index / 9)
         let col = index % 9
         sudoku[row][col] = max_i
