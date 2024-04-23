@@ -67,8 +67,8 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
                     }
                 }
                 if (bestProbabilty > application.probability[i]) {
-                    application.sudoku[i] = bestGuess
-                    application.probability[i] = bestProbabilty
+                    application.sudoku[i] = bestGuess + 1
+                    application.probability[i] = bestProbabilty  
                 }
             }
             drawSolutionOnCanvas(application.sudoku, solutionCanvas)
@@ -241,9 +241,9 @@ export function setBorder(img: cv.Mat, borderSize: number, val: number) {
 }
 
 export function predictionToSudoku(prediction: Uint8Array): number[][] {
-    let sudoku = Array(9).fill(0).map(_ => Array(9).fill(0))
+    let sudoku = Array(SUDOKU_HEIGHT).fill(0).map(_ => Array(SUDOKU_WIDTH).fill(0))
 
-    for (let i = 0; i < prediction.length; i += 10) {
+    for (let i = 0; i < prediction.length; i += NUM_CLASSES) {
 
         // Find index of max value
         let max_i = i;
@@ -257,9 +257,9 @@ export function predictionToSudoku(prediction: Uint8Array): number[][] {
 
         // Add index to sudoku
         let index = ~~(i / NUM_CLASSES)
-        let row = ~~(index / 9)
-        let col = index % 9
-        sudoku[row][col] = max_i % 10
+        let row = ~~(index / SUDOKU_HEIGHT)
+        let col = index % SUDOKU_WIDTH
+        sudoku[row][col] = max_i % NUM_CLASSES + 1
     }
 
     return sudoku
