@@ -34,6 +34,25 @@ with open(digits_path, "rb") as f:
         img = img.reshape((28, 28))
         digits[n] = img
 
+
+# Remove some zeroes
+num_zeroes = sum(map(lambda l: not (l), labels))
+target_zeroes = num_zeroes // 2
+
+digits_temp = np.empty((num_images - target_zeroes, 28, 28))
+labels_temp = np.empty((num_images - target_zeroes))
+
+zeroes = 0
+j = 0
+for i in range(num_images):
+    if (labels[i] == 0):
+        if (zeroes >= target_zeroes):
+            continue
+        zeroes += 1
+    labels_temp[j] = labels[i]
+    digits_temp[j] = digits[i]
+    j += 1
+
 # Split into train and test
 (x_train, y_train), (x_test, y_test) = split_data(digits, labels)
 
