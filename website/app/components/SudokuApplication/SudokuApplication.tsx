@@ -79,12 +79,12 @@ export default function SudokuApplicationElement() {
         if (transformedCanvasRef.current && application.model && batchCanvasRef.current) {
             console.log("yes")
             const img = cv.imread(transformedCanvasRef.current)
-            const batchImagesArray = sudokuImgToBatchImagesArray(img)
-            const prediction = predictBatchImages(batchImagesArray, application.model, SUDOKU_SIZE);
+            const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(img)
+            const prediction = predictBatchImages(batchImagesArray, application.model, indices.length);
             
             (async () => {
                 const data = await prediction.data()
-                const formated = predictionToSudoku(data)
+                const formated = predictionToSudoku(data, indices)
                 console.log(data)
                 console.log(formated)
             })()
