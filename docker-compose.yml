@@ -4,6 +4,7 @@ services:
   sudokusolver:
     build:
       context: .
+      network: "host"
       dockerfile: Dockerfile
     volumes:
       - ./website/app:/website/app
