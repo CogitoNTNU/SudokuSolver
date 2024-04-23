@@ -23,5 +23,6 @@ export async function POST(request: Request) {
     }
     else {
         console.log("bad data")
+        console.log(request)
     }
 }

@@ -10,6 +10,7 @@ export default function Page() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const [id, setId] = useState(0)
     const [labelVal, setLabelVal] = useState(0)
+    const inputRef = useRef(null)
     const [images, setImages] = useState<{
         id: number;
         data: Buffer;
@@ -17,20 +18,25 @@ export default function Page() {
     }[]>([])
 
     const handleKeyPress = useCallback(async (event: KeyboardEvent) => {
-        let label = parseInt(event.key)
-        if (isNaN(label)) return;
-        fetch(`/api/image/update?id=${id}&label=${label}`, {
-            method: "POST"
-        })
-        const response = await fetch(`/api/image?id=${id}&gt=true`, {
-            method: "GET"
-        })
-        if (response.ok) {
-            (async () => {
-                const result = await response.json()
-                displayImage(result)
-                setId(result.id)
-            })()
+        if (inputRef.current) {
+            console.log(inputRef.current)
+            if (inputRef.current != document.activeElement) {
+                let label = parseInt(event.key)
+                if (isNaN(label)) return;
+                fetch(`/api/image/update?id=${id}&label=${label}`, {
+                    method: "POST"
+                })
+                const response = await fetch(`/api/image?id=${id}&gt=true`, {
+                    method: "GET"
+                })
+                if (response.ok) {
+                    (async () => {
+                        const result = await response.json()
+                        displayImage(result)
+                        setId(result.id)
+                    })()
+                }
+            }
         }
     }, [id])
 
@@ -121,7 +127,7 @@ export default function Page() {
                     URL.revokeObjectURL(digitsUrl)
                 }
             }}>Last ned data</button>
-            <input type="number" value={id} onChange={async event => {
+            <input type="number" ref={inputRef} value={id} onChange={async event => {
                 const val = parseInt(event.target.value)
                 if (val != id) {
                     setId(val)
