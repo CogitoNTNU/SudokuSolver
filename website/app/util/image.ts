@@ -240,7 +240,7 @@ export function setBorder(img: cv.Mat, borderSize: number, val: number) {
     img.roi(rightROI).setTo(new cv.Scalar(val))
 }
 
-export function predictionToSudoku(prediction: Uint8Array): number[][] {
+export function predictionToSudoku(prediction: Float32Array, indices: number[]): number[][] {
     let sudoku = Array(SUDOKU_HEIGHT).fill(0).map(_ => Array(SUDOKU_WIDTH).fill(0))
 
     for (let i = 0; i < prediction.length; i += NUM_CLASSES) {
@@ -255,8 +255,8 @@ export function predictionToSudoku(prediction: Uint8Array): number[][] {
             }
         }
 
-        // Add index to sudoku
-        let index = ~~(i / NUM_CLASSES)
+        // Place value in sudoku
+        let index = indices[~~(i / NUM_CLASSES)]
         let row = ~~(index / SUDOKU_HEIGHT)
         let col = index % SUDOKU_WIDTH
         sudoku[row][col] = max_i % NUM_CLASSES + 1
