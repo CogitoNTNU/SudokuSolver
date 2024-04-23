@@ -226,7 +226,7 @@ export function setBorder(img: cv.Mat, borderSize: number, val: number) {
     img.roi(rightROI).setTo(new cv.Scalar(val))
 }
 
-export function predictionToSudoku(prediction: Float32Array, indices: number[]): number[][] {
+export function predictionToSudoku(prediction: Float32Array | Uint8Array | Int32Array, indices: number[]): number[][] {
     let sudoku = Array(SUDOKU_HEIGHT).fill(0).map(_ => Array(SUDOKU_WIDTH).fill(0))
 
     for (let i = 0; i < prediction.length; i += NUM_CLASSES) {

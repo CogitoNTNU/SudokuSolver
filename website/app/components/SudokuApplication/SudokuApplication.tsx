@@ -11,6 +11,7 @@ import { loadLayersModel } from "@tensorflow/tfjs"
 import { sudokuImgToBatchImagesArray } from "../../util/image"
 import { predictBatchImages } from "@/app/util/model"
 import { NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE } from "@/app/context/sudokuApplication/Types"
+import { solve } from "@/app/util/solver"
 
 
 export default function SudokuApplicationElement() {
@@ -132,6 +133,10 @@ export default function SudokuApplicationElement() {
             <canvas ref={batchCanvasRef}></canvas>
             <button onClick={logSudoku}>Log sudoku</button>
             <button onClick={predict}>Predict sudoku</button>
+            <button onClick={() => {
+                solve(application.sudoku)
+                console.log(application.sudoku)
+            }}>Solve</button>
         </>
     )
 }
