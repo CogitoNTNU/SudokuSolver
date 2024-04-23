@@ -5,12 +5,12 @@ import CameraButton from "../Camera/CameraButton"
 import { useRef, useEffect, useCallback } from "react"
 import cv from "@techstark/opencv-js"
 import { CameraState } from "../Camera/Types" 
-import { drawVideoOnCanvas } from "../../util/image"
+import { drawVideoOnCanvas } from "../../util/image" 
 import { useSudokuApplicationContext } from "../../context/sudokuApplication/SudokuApplication"
 import { loadLayersModel } from "@tensorflow/tfjs"
 import { sudokuImgToBatchImagesArray } from "../../util/image"
-import { formatPredictionData, predictBatchImages } from "@/app/util/model"
-import { NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, SUDOKU_WIDTH, SUDOKU_HEIGHT } from "@/app/context/sudokuApplication/Types"
+import { predictBatchImages } from "@/app/util/model"
+import { NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE } from "@/app/context/sudokuApplication/Types"
 
 
 export default function SudokuApplicationElement() {
@@ -46,6 +46,15 @@ export default function SudokuApplicationElement() {
 
     useEffect(() => {
         loadModel()
+        navigator.mediaDevices.enumerateDevices().then((devices) => {
+            const cameras = devices.filter(device => device.kind === 'videoinput')
+            cameras.forEach(camera => {
+              console.log('Camera label:', camera.label)
+              console.log('Camera ID:', camera.deviceId)
+              console.log('Camera group ID:', camera.groupId)
+            })
+        })
+
     }, [])
 
 
@@ -69,13 +78,12 @@ export default function SudokuApplicationElement() {
         if (transformedCanvasRef.current && application.model && batchCanvasRef.current) {
             console.log("yes")
             const img = cv.imread(transformedCanvasRef.current)
-            const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(img)
-            const prediction = predictBatchImages(batchImagesArray, application.model, indices.length);
+            const batchImagesArray = sudokuImgToBatchImagesArray(img)
+            const prediction = predictBatchImages(batchImagesArray, application.model, SUDOKU_SIZE);
             
             (async () => {
                 const data = await prediction.data()
-                const formated = formatPredictionData(data, indices)
-                console.log(formated)
+                console.log(data)
             })()
             const imgData = new ImageData(NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH, NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT)
             let index = 0

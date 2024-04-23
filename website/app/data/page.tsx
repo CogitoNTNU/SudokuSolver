@@ -22,7 +22,7 @@ export default function Page() {
             console.log(inputRef.current)
             if (inputRef.current != document.activeElement) {
                 let label = parseInt(event.key)
-                if (isNaN(label)) return;
+                if (isNaN(label)) return
                 fetch(`/api/image/update?id=${id}&label=${label}`, {
                     method: "POST"
                 })

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 size = 28*28
-n = 3
+n = 20
 
 
 with open("website/prisma/seeding/labels.bin", "rb") as file:
