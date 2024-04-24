@@ -1,10 +1,8 @@
-"use client"
-
 /**
  * Solves the given sudoku in-place using recursive backtracking.
  * Returns True if a solution was found, False otherwise.
  */
-export function solve(sudoku: number[][]): boolean {
+export function solve(sudoku: Uint8Array): boolean {
     const row_contains: Set<number>[] = Array(9).fill(0).map(() => new Set())
     const col_contains: Set<number>[] = Array(9).fill(0).map(() => new Set())
     const box_contains: Set<number>[] = Array(9).fill(0).map(() => new Set())
@@ -24,7 +22,7 @@ export function solve(sudoku: number[][]): boolean {
     // Add existing numbers
     for (let i = 0; i < 81; i++) {
         const [row, col, box] = getPosition(i)
-        const num = sudoku[row][col]
+        const num = sudoku[i]
 
         if (num == 0)
             continue;
@@ -41,7 +39,7 @@ export function solve(sudoku: number[][]): boolean {
 
         // Loop until next empty cell
         let [row, col, box] = getPosition(index)
-        while (sudoku[row][col] != 0) {
+        while (sudoku[index] != 0) {
             index++;
             [row, col, box] = getPosition(index)
             if (index >= 81)
@@ -60,7 +58,7 @@ export function solve(sudoku: number[][]): boolean {
             if (invalid_numbers.has(num))
                 continue
 
-            sudoku[row][col] = num
+            sudoku[index] = num
             row_contains[row].add(num)
             col_contains[col].add(num)
             box_contains[box].add(num)
@@ -72,7 +70,7 @@ export function solve(sudoku: number[][]): boolean {
             col_contains[col].delete(num)
             box_contains[box].delete(num)
         }
-        sudoku[row][col] = 0
+        sudoku[index] = 0
         return false
     }
 
