@@ -170,7 +170,7 @@ return (
 
             dctx.putImageData(imgData, 0, 0)
 
-            const prediction = predictBatchImages(batchImagesArray, model, SUDOKU_SIZE);
+            const prediction = predictBatchImages(batchImagesArray, model, indices.length);
 
             (async () => {
                 const data = await prediction.data()

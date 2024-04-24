@@ -5,8 +5,8 @@ from keras.layers import Conv2D, MaxPooling2D, BatchNormalization
 from sklearn.preprocessing import LabelBinarizer
 import tensorflowjs as tfjs
 
-label_path = "website/prisma/seeding/labels.bin"
-digits_path = "website/prisma/seeding/digits.bin"
+label_path = "../website/prisma/seeding/labels.bin"
+digits_path = "../website/prisma/seeding/digits.bin"
 model_path = "new_model"
 
 
@@ -105,7 +105,7 @@ model.compile(optimizer="adam", loss="categorical_crossentropy",
 
 # Fit model
 model.fit(x_train, y_train, validation_data=(x_test, y_test),
-          batch_size=20, epochs=50, verbose=1)  # train model
+          batch_size=20, epochs=10, verbose=1)  # train model
 
 
 # Save model

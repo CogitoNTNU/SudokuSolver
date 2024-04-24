@@ -11,7 +11,6 @@ import { loadLayersModel } from "@tensorflow/tfjs"
 import { sudokuImgToBatchImagesArray } from "../../util/image"
 import { predictBatchImages } from "@/app/util/model"
 import { NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE, NUM_CLASSES } from "@/app/context/sudokuApplication/Types"
-import { solve } from "@/app/util/solver"
 
 
 export default function SudokuApplicationElement() {
@@ -24,7 +23,7 @@ export default function SudokuApplicationElement() {
     const transformedSolutionCanvasRef = useRef<HTMLCanvasElement | null>(null)
     const batchCanvasRef = useRef<HTMLCanvasElement | null>(null)
 
-    const solveWorkerRef = useRef<Worker>(new Worker(new URL("solveWorker.ts", import.meta.url)))
+    // const solveWorkerRef = useRef<Worker>(new Worker(new URL("solveWorker.ts", import.meta.url)))
 
     const callbackFunction = useCallback(() => {
         if (application.model) {
@@ -49,9 +48,9 @@ export default function SudokuApplicationElement() {
 
     useEffect(() => {
         loadModel()
-        solveWorkerRef.current.onmessage = (event: MessageEvent<number[][]>) => {
-            console.log(event.data)
-        }
+        // solveWorkerRef.current.onmessage = (event: MessageEvent<number[][]>) => {
+        //     console.log(event.data)
+        // }
     }, [])
 
 
@@ -133,7 +132,7 @@ export default function SudokuApplicationElement() {
             <button onClick={logSudoku}>Log sudoku</button>
             <button onClick={predict}>Predict sudoku</button>
             <button onClick={() => {
-                solveWorkerRef.current.postMessage(application.sudoku)
+                // solveWorkerRef.current.postMessage(application.sudoku)
             }}>Solve</button>
         </>
     )
