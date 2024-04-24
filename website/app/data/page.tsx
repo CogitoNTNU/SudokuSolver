@@ -93,12 +93,7 @@ export default function Page() {
 
                     for (let i = 0; i < result.length; i++) {
                         digitsData.set(result[i].data.data, i*NUMBER_IMAGE_SIZE)
-                        if (result[i].label == null) {
-                            labelData[i] = 255
-                        }
-                        else {
-                            labelData[i] = parseInt(result[i].label)
-                        }
+                        labelData[i] = parseInt(result[i].label)
                     }
 
                     const labelBlob = new Blob([labelData], { type: 'application/octet-stream' })

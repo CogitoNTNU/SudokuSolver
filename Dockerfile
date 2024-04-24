@@ -18,4 +18,4 @@ COPY /website/ .
 RUN npx prisma migrate reset
 
 # Specify the command to run the Next.js development server
-CMD ["npm", "run", "dev"]
+# CMD ["npm", "run", "dev"]

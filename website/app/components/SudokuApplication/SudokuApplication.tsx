@@ -10,7 +10,7 @@ import { useSudokuApplicationContext } from "../../context/sudokuApplication/Sud
 import { loadLayersModel } from "@tensorflow/tfjs"
 import { sudokuImgToBatchImagesArray } from "../../util/image"
 import { predictBatchImages } from "@/app/util/model"
-import { NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE } from "@/app/context/sudokuApplication/Types"
+import { NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE, NUM_CLASSES } from "@/app/context/sudokuApplication/Types"
 import { solve } from "@/app/util/solver"
 
 
@@ -80,8 +80,12 @@ export default function SudokuApplicationElement() {
             
             (async () => {
                 const data = await prediction.data()
+                const formatedRaw = []
+                for (let i = 0; i < indices.length; i++) {
+                    formatedRaw.push(data.slice(i*NUM_CLASSES, (i+1)*NUM_CLASSES))
+                }
                 const formated = predictionToSudoku(data, indices)
-                console.log(data)
+                console.log(formatedRaw)
                 console.log(formated)
             })()
             const imgData = new ImageData(NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH, NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT)

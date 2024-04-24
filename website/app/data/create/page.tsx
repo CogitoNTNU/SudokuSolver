@@ -28,22 +28,12 @@ export default function Page() {
                 const img = cv.imread(canvas)
                 const corners = getCorners(img, canvas)
 
-                console.log(corners)
                 if (corners) {
                     sortPointsRadially(corners)
-                    // const a = 3
-                    // corners[0][0] += a
-                    // corners[0][1] += a
-                    // corners[1][0] -= a
-                    // corners[1][1] += a
-                    // corners[2][0] -= a
-                    // corners[2][1] -= a
-                    // corners[3][0] += a
-                    // corners[3][1] -= a
                     transformImgSection(img, img, corners.flat(), [0, 0, canvas.width, 0, canvas.width, canvas.height, 0, canvas.height], new cv.Size(canvas.width, canvas.height))
                     cv.imshow(canvas, img)
 
-                    const batchImagesArray = sudokuImgToBatchImagesArray(img)
+                    const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(img)
                     
                     const imgData = new ImageData(NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH, NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT)
                     let index = 0
@@ -64,6 +54,7 @@ export default function Page() {
                     }
                     canvas.width = SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH
                     canvas.height = SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT
+                    imgData.data[imgData.data.length-1] = indices.length
                     ctx.putImageData(imgData, 0, 0)
                 }
 
@@ -92,7 +83,10 @@ export default function Page() {
                 if (canvas) {
                     const ctx = canvas.getContext("2d")
                     if (ctx) {
-                        for (let i = 0; i < SUDOKU_SIZE; i++) {
+                        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+                        const l = imgData.data[imgData.data.length-1]
+                        console.log(l)
+                        for (let i = 0; i < l; i++) {
                             const x = i%SUDOKU_WIDTH
                             const y = Math.floor(i/SUDOKU_WIDTH)
                             const pixeldata = ctx.getImageData(x*NUMBER_IMAGE_WIDTH, y*NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT).data

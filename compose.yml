@@ -1,19 +1,19 @@
 version: "3.8"
 
 services:
-  sudokusolver:
-    build:
-      context: .
-      network: "host"
-      dockerfile: Dockerfile
-    volumes:
-      - ./website:/website
-    ports:
-      - 3000:3000
-    depends_on:
-      - db
-    environment:
-      DB_URI: ${DB_URI}
+  # sudokusolver:
+  #   build:
+  #     context: .
+  #     network: "host"
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./website:/website
+  #   ports:
+  #     - 3000:3000
+  #   depends_on:
+  #     - db
+  #   environment:
+  #     DB_URI: ${DB_URI}
   
   db:
     image: postgres:16.0-alpine

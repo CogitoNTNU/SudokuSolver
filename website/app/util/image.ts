@@ -19,6 +19,8 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
 
     const img = cv.imread(canvas)
     const sudokuCorners = getCorners(img, canvas)
+    
+    console.log(application.sudokuState)
 
     // Use detected corners if available
     if (sudokuCorners && application.model) {
