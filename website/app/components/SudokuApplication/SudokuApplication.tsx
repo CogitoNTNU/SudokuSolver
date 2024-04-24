@@ -24,6 +24,8 @@ export default function SudokuApplicationElement() {
     const transformedSolutionCanvasRef = useRef<HTMLCanvasElement | null>(null)
     const batchCanvasRef = useRef<HTMLCanvasElement | null>(null)
 
+    const solveWorkerRef = useRef<Worker>(new Worker(new URL("solveWorker.ts", import.meta.url)))
+
     const callbackFunction = useCallback(() => {
         if (application.model) {
             if (!videoRef.current || !canvasRef.current || !transformedCanvasRef.current || !solutionCanvasRef.current || !transformedSolutionCanvasRef.current || !batchCanvasRef.current) {
@@ -47,16 +49,9 @@ export default function SudokuApplicationElement() {
 
     useEffect(() => {
         loadModel()
-        navigator.mediaDevices.enumerateDevices().then((devices) => {
-            const cameras = devices.filter(device => device.kind === 'videoinput')
-            cameras.forEach(camera => {
-                console.log(camera)
-                // console.log('Camera label:', camera.label)
-                // console.log('Camera ID:', camera.deviceId)
-                // console.log('Camera group ID:', camera.groupId)
-            })
-        })
-
+        solveWorkerRef.current.onmessage = (event: MessageEvent<number[][]>) => {
+            console.log(event.data)
+        }
     }, [])
 
 
@@ -134,8 +129,7 @@ export default function SudokuApplicationElement() {
             <button onClick={logSudoku}>Log sudoku</button>
             <button onClick={predict}>Predict sudoku</button>
             <button onClick={() => {
-                solve(application.sudoku)
-                console.log(application.sudoku)
+                solveWorkerRef.current.postMessage(application.sudoku)
             }}>Solve</button>
         </>
     )

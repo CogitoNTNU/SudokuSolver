@@ -138,7 +138,7 @@ export function transformImgSection(src: cv.Mat, dst: cv.Mat, inputPoints: numbe
 }
 
 
-export function drawSolutionOnCanvas(solution: number[][], canvas: HTMLCanvasElement) {
+export function drawSolutionOnCanvas(solution: Uint8Array, canvas: HTMLCanvasElement) {
     const ctx = canvas.getContext("2d")
     if (!ctx) {
         console.error("Could not get 2d context from canvas")
@@ -149,13 +149,13 @@ export function drawSolutionOnCanvas(solution: number[][], canvas: HTMLCanvasEle
 
     const size = canvas.width / 9
     ctx.fillStyle = "black"
-    ctx.font = `${size}px monospace`;
+    ctx.font = `${size}px monospace`
 
-    for (let y = 0; y < SUDOKU_HEIGHT; y++) {
-        for (let x = 0; x < SUDOKU_WIDTH; x++) {
-            if (solution[y][x] != 0)
-                ctx.fillText(solution[y][x].toString(), size * x + size * 0.2, size * (y+1) - size * 0.1)
-
+    for (let i = 0; i < SUDOKU_SIZE; i++) {
+        if (solution[i] != 0) {
+            let x = i%SUDOKU_WIDTH
+            let y = Math.floor(i/SUDOKU_WIDTH)
+            ctx.fillText(solution[i].toString(), size * x + size * 0.2, size * (y+1) - size * 0.1)
         }
     }
 }
@@ -226,8 +226,8 @@ export function setBorder(img: cv.Mat, borderSize: number, val: number) {
     img.roi(rightROI).setTo(new cv.Scalar(val))
 }
 
-export function predictionToSudoku(prediction: Float32Array | Uint8Array | Int32Array, indices: number[]): number[][] {
-    let sudoku = Array(SUDOKU_HEIGHT).fill(0).map(_ => Array(SUDOKU_WIDTH).fill(0))
+export function predictionToSudoku(prediction: Float32Array | Uint8Array | Int32Array, indices: number[]): Uint8Array {
+    let sudoku = new Uint8Array(SUDOKU_SIZE)
 
     for (let i = 0; i < prediction.length; i += NUM_CLASSES) {
 
@@ -243,9 +243,7 @@ export function predictionToSudoku(prediction: Float32Array | Uint8Array | Int32
 
         // Place value in sudoku
         let index = indices[~~(i / NUM_CLASSES)]
-        let row = ~~(index / SUDOKU_HEIGHT)
-        let col = index % SUDOKU_WIDTH
-        sudoku[row][col] = max_i % NUM_CLASSES + 1
+        sudoku[index] = max_i % NUM_CLASSES + 1
     }
 
     return sudoku
