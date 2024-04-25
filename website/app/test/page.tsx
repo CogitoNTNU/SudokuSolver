@@ -3,7 +3,7 @@ import styles from "./page.module.scss"
 import { useEffect, useState, useRef } from "react"
 import { loadLayersModel, LayersModel } from "@tensorflow/tfjs"
 import cv from "@techstark/opencv-js"
-import { NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_SIZE, SUDOKU_HEIGHT, SUDOKU_WIDTH, SUDOKU_SIZE } from "../context/sudokuApplication/Types"
+import { NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_SIZE, SUDOKU_HEIGHT, SUDOKU_WIDTH } from "../context/sudokuApplication/Types"
 import { sudokuImgToBatchImagesArray } from "../util/image"
 import { predictBatchImages } from "../util/model"
 
@@ -18,7 +18,7 @@ const [input, setInput] = useState<number>(0)
 useEffect(() => {
     async function loadModel() {
         try {
-            const loadedModel = await loadLayersModel('/models/new_model/model.json')
+            const loadedModel = await loadLayersModel('/models/digit_model/model.json')
             setModel(loadedModel)
             console.log('Model loaded successfully')
         } 
@@ -88,7 +88,6 @@ function btnClick() {
 return (
     <div>
         <img ref={imageRef} className={styles.image} src="/square.jpg" alt="" />
-        {/* <img ref={imageRef} className={styles.hidden} src="/square.jpg" alt="" /> */}
         <button onClick={btnClick}>Trykk på meg</button>
         <canvas ref={canvasRef}></canvas>
         <div>

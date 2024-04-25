@@ -1,3 +1,4 @@
+"use client"
 import { LayersModel, tensor2d } from "@tensorflow/tfjs"
 import { NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, NUM_CLASSES } from "../context/sudokuApplication/Types"
 

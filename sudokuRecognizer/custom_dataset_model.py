@@ -8,8 +8,8 @@ from keras.preprocessing.image import ImageDataGenerator
 from sklearn.preprocessing import LabelBinarizer
 import tensorflowjs as tfjs
 
-label_path = "../website/prisma/seeding/labels.bin"
-digits_path = "../website/prisma/seeding/digits.bin"
+label_path = "website/prisma/seeding/labels.bin"
+digits_path = "website/prisma/seeding/digits.bin"
 model_path = "new_model"
 
 
@@ -54,8 +54,6 @@ digits = digits[zero_mask]
 x_train = x_train.astype(np.float32) / 255.0
 x_test = x_test.astype(np.float32) / 255.0
 
-for i in range(10):
-    print(i, len(y_test[np.where(y_test == i)]))
 
 # # Turn labels into vectors
 le = LabelBinarizer()
@@ -88,33 +86,28 @@ IMAGE_CHANNELS = 1
 model.add(Conv2D(filters=8, kernel_size=5, strides=1, activation='relu', 
                     kernel_initializer='glorot_uniform', 
                     input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS)))
+
 model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 
 model.add(Conv2D(filters=16, kernel_size=5, strides=1, activation='relu', 
                     kernel_initializer='glorot_uniform'))
+
 model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 
 model.add(Flatten())
 
-NUM_OUTPUT_CLASSES = 9  # Change this back to 10 if you're recognizing digits 0-9
-model.add(Dense(units=NUM_OUTPUT_CLASSES, activation='softmax',
+model.add(Dense(units=9, activation='softmax',
                 kernel_initializer='glorot_uniform'))
 
-optimizer = Adam()
-model.compile(optimizer=optimizer,
+model.compile(optimizer=Adam(),
                 loss=CategoricalCrossentropy(),
                 metrics=[Accuracy()])
 
-# Compile model
 model.compile(optimizer="adam", loss="categorical_crossentropy",
               metrics=["accuracy"])
 
-# Fit model
 model.fit(x_train, y_train, validation_data=(x_train, y_train),
           batch_size=64, epochs=8, shuffle=True, verbose=1)
-# model.fit(datagen.flow(x_train, y_train), validation_data=(datagen.flow(x_train, y_train)),
-#           batch_size=64, epochs=20, shuffle=True, verbose=1)
 
 
-# Save model
 tfjs.converters.save_keras_model(model, model_path)

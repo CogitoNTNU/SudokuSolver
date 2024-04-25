@@ -36,7 +36,7 @@ export default function SudokuApplicationElement() {
     
 
     const loadModel = useCallback(() => {
-        loadLayersModel('/models/new_model/model.json').then(loadedModel => {
+        loadLayersModel('/models/digit_model/model.json').then(loadedModel => {
             application.model = loadedModel
             console.log("model loaded")
         })
