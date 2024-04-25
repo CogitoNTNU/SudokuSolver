@@ -1,7 +1,9 @@
 import numpy as np
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D, BatchNormalization
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from keras.optimizers import Adam
+from keras.losses import CategoricalCrossentropy
+from keras.metrics import Accuracy
 from sklearn.preprocessing import LabelBinarizer
 import tensorflowjs as tfjs
 
@@ -35,27 +37,10 @@ with open(digits_path, "rb") as f:
         digits[n] = img
 
 
-# Remove some zeroes
-num_zeroes = len(labels[np.where(labels == 0)])
-# print(num_zeroes)
-for i in range(10):
-    print(i, len(labels[np.where(labels == i)]))
 
-target_zeroes = num_zeroes // 11
+# for i in range(10):
+#     print(i, len(labels[np.where(labels == i)]))
 
-digits_temp = np.empty((num_images - target_zeroes, 28, 28))
-labels_temp = np.empty((num_images - target_zeroes))
-
-zeroes = 0
-j = 0
-for i in range(num_images):
-    if (labels[i] == 0):
-        if (zeroes >= target_zeroes):
-            continue
-        zeroes += 1
-    labels_temp[j] = labels[i]
-    digits_temp[j] = digits[i]
-    j += 1
 # Remove all zeroes
 zero_mask = np.where(labels != 0)
 labels = labels[zero_mask]
@@ -64,40 +49,40 @@ digits = digits[zero_mask]
 # Split into train and test
 (x_train, y_train), (x_test, y_test) = split_data(digits, labels)
 
-# Turn labels into vectors
+for i in range(10):
+    print(i, len(y_test[np.where(y_test == i)]))
+
+# # Turn labels into vectors
 le = LabelBinarizer()
 y_train = le.fit_transform(y_train)
 y_test = le.transform(y_test)
 
 # Define model
 model = Sequential()
+    
+IMAGE_WIDTH = 28
+IMAGE_HEIGHT = 28
+IMAGE_CHANNELS = 1
 
-model.add(Conv2D(filters=32, kernel_size=(3, 3), activation='relu', strides=1, padding='same', data_format='channels_last',
-                 input_shape=(28, 28, 1)))
-model.add(BatchNormalization())
-model.add(Conv2D(filters=32, kernel_size=(3, 3), activation='relu',
-          strides=1, padding='same', data_format='channels_last'))
-model.add(BatchNormalization())
-model.add(MaxPooling2D(pool_size=(2, 2), strides=2, padding='valid'))
-model.add(Dropout(0.25))
+model.add(Conv2D(filters=8, kernel_size=5, strides=1, activation='relu', 
+                    kernel_initializer='glorot_uniform', 
+                    input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS)))
+model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 
-model.add(Conv2D(filters=64, kernel_size=(3, 3), activation='relu',
-          strides=1, padding='same', data_format='channels_last'))
-model.add(BatchNormalization())
-model.add(Conv2D(filters=64, kernel_size=(3, 3), strides=1,
-          padding='same', activation='relu', data_format='channels_last'))
-model.add(BatchNormalization())
-model.add(MaxPooling2D(pool_size=(2, 2), padding='valid', strides=2))
-model.add(Dropout(0.25))
+model.add(Conv2D(filters=16, kernel_size=5, strides=1, activation='relu', 
+                    kernel_initializer='glorot_uniform'))
+model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 
 model.add(Flatten())
-model.add(Dense(512, activation='relu'))
-model.add(BatchNormalization())
-model.add(Dropout(0.25))
-model.add(Dense(1024, activation='relu'))
-model.add(BatchNormalization())
-model.add(Dropout(0.5))
-model.add(Dense(9, activation='softmax'))
+
+NUM_OUTPUT_CLASSES = 9  # Change this back to 10 if you're recognizing digits 0-9
+model.add(Dense(units=NUM_OUTPUT_CLASSES, activation='softmax',
+                kernel_initializer='glorot_uniform'))
+
+optimizer = Adam()
+model.compile(optimizer=optimizer,
+                loss=CategoricalCrossentropy(),
+                metrics=[Accuracy()])
 
 # Compile model
 model.compile(optimizer="adam", loss="categorical_crossentropy",
@@ -105,7 +90,7 @@ model.compile(optimizer="adam", loss="categorical_crossentropy",
 
 # Fit model
 model.fit(x_train, y_train, validation_data=(x_test, y_test),
-          batch_size=20, epochs=10, verbose=1)  # train model
+          batch_size=64, epochs=20, shuffle=True, verbose=1)  # train model
 
 
 # Save model
