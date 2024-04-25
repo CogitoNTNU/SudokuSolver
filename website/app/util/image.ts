@@ -3,6 +3,7 @@ import cv from "@techstark/opencv-js"
 import { SudokuApplication, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE, NUM_CLASSES } from "../context/sudokuApplication/Types"
 import { predictBatchImages } from "./model"
 import { sortPointsRadially } from "./sort"
+import { solve } from "./solver"
 
 
 export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasElement, application: SudokuApplication, transformedCanvas: HTMLCanvasElement, solutionCanvas: HTMLCanvasElement, transformedSolutionCanvas: HTMLCanvasElement, batchCanvas: HTMLCanvasElement) {
@@ -58,19 +59,24 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
         (async () => {
             const data = await prediction.data()
 
-            const bestProbs = []
             for (let i = 0; i < indices.length; i++) {
-                let best = 0
+                let bestProb = 0
+                let digit = 0
                 for (let j = 0; j < NUM_CLASSES; j++) {
-                    if (data[i*NUM_CLASSES+j] > best) {
-                        best = data[i*NUM_CLASSES+j]
+                    if (data[i*NUM_CLASSES+j] > bestProb) {
+                        bestProb = data[i*NUM_CLASSES+j]
+                        digit = j + 1
                     }
                 }
-                bestProbs.push(best)
+                if (bestProb > application.probability[indices[i]]) {
+                    application.sudoku[indices[i]] = digit
+                    application.probability[indices[i]] = bestProb
+                }
             }
 
-            application.sudoku = predictionToSudoku(data, indices)
-            drawSolutionOnCanvas(application.sudoku, solutionCanvas, bestProbs)
+            const sudoku = predictionToSudoku(data, indices)
+            drawSolutionOnCanvas(application.sudoku, solutionCanvas, application.probability)
+            solve(application.sudoku)
 
             const solutionImg = cv.imread(solutionCanvas)
             const transformedSolutionImg = new cv.Mat()
@@ -151,7 +157,7 @@ export function transformImgSection(src: cv.Mat, dst: cv.Mat, inputPoints: numbe
 }
 
 
-export function drawSolutionOnCanvas(solution: Uint8Array, canvas: HTMLCanvasElement, probs: number[]) {
+export function drawSolutionOnCanvas(solution: Uint8Array, canvas: HTMLCanvasElement, probs: Float32Array) {
     const ctx = canvas.getContext("2d")
     if (!ctx) {
         console.error("Could not get 2d context from canvas")
@@ -163,13 +169,9 @@ export function drawSolutionOnCanvas(solution: Uint8Array, canvas: HTMLCanvasEle
     const size = canvas.width / 9
     ctx.font = `${size}px monospace`
     
-    let count = 0
-
     for (let i = 0; i < SUDOKU_SIZE; i++) {
         if (solution[i] != 0) {
-            ctx.fillStyle = `rgb(${Math.floor((1-probs[count])*255)}, 0, 0)`
-            // ctx.fillStyle = `rgb(255, 0, 0)`
-            count++
+            ctx.fillStyle = `rgb(${Math.floor((1-probs[i])*255)}, 0, 0)`
             let x = i%SUDOKU_WIDTH
             let y = Math.floor(i/SUDOKU_WIDTH)
             ctx.fillText(solution[i].toString(), size * x + size * 0.2, size * (y+1) - size * 0.1)
