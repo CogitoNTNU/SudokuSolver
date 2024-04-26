@@ -8,8 +8,9 @@ export interface SudokuApplication {
     sudokuState: SudokuState,
     setSudokuState: Dispatch<SetStateAction<SudokuState>>
     model: LayersModel | null,
+    setModel: Dispatch<SetStateAction<LayersModel | null>>,
     sudoku: Uint8Array,
-    probability: Float32Array,
+    confidence: Float32Array,
     solution: Uint8Array
 }
 
@@ -17,7 +18,8 @@ export enum SudokuState {
     NotFound,
     IsPredicting,
     IsSolving,
-    Solved
+    Solved,
+    Lost
 }
 
 export const NUMBER_IMAGE_WIDTH = 28

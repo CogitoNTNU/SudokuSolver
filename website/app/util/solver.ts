@@ -3,6 +3,7 @@
  * Returns True if a solution was found, False otherwise.
  */
 export function solve(sudoku: Uint8Array): boolean {
+    console.log("solving")
     const row_contains: Set<number>[] = Array(9).fill(0).map(() => new Set())
     const col_contains: Set<number>[] = Array(9).fill(0).map(() => new Set())
     const box_contains: Set<number>[] = Array(9).fill(0).map(() => new Set())

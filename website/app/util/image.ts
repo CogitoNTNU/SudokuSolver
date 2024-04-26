@@ -1,7 +1,7 @@
 "use client"
 import cv from "@techstark/opencv-js"
-import { SudokuApplication, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE, NUM_CLASSES } from "../context/sudokuApplication/Types"
-import { predictBatchImages } from "./model"
+import { SudokuApplication, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE, NUM_CLASSES, SudokuState } from "../context/sudokuApplication/Types"
+import { countSudokuDiff, predictBatchImages, processPredictionData } from "./model"
 import { sortPointsRadially } from "./sort"
 import { solve } from "./solver"
 
@@ -20,9 +20,9 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
 
     const img = cv.imread(canvas)
     const sudokuCorners = getCorners(img, canvas)
-    
-    console.log(application.sudokuState)
 
+    console.log(application.sudokuState)
+    
     // Use detected corners if available
     if (sudokuCorners && application.model) {
         sortPointsRadially(sudokuCorners)
@@ -32,6 +32,8 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
         cv.imshow(transformedCanvas, transformedImg)
 
         const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(transformedImg)
+        transformedImg.delete()
+
         const imgData = new ImageData(NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH, NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT)
         let index = 0
         for (let w = 0; w < 9; w++) {
@@ -58,26 +60,47 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
 
         (async () => {
             const data = await prediction.data()
+            const [sudoku, confidence, averageConfidence, worstConfidence] = processPredictionData(data, indices)
 
-            for (let i = 0; i < indices.length; i++) {
-                let bestProb = 0
-                let digit = 0
-                for (let j = 0; j < NUM_CLASSES; j++) {
-                    if (data[i*NUM_CLASSES+j] > bestProb) {
-                        bestProb = data[i*NUM_CLASSES+j]
-                        digit = j + 1
+            if (averageConfidence > 0.9 && worstConfidence > 0.8) {
+                const solution = sudoku.slice()
+
+                if (application.sudokuState == SudokuState.Solved) {
+                    console.log("diff", countSudokuDiff(sudoku, application.sudoku))
+                    if (countSudokuDiff(sudoku, application.sudoku) > 5) {
+                        if (solve(solution)) {
+                            application.sudoku = sudoku
+                            application.confidence = confidence
+                            for (let i = 0; i < SUDOKU_SIZE; i++) {
+                                if (sudoku[i] == 0) {
+                                    application.solution[i] = solution[i]
+                                }
+                                else {
+                                    application.solution[i] = 0
+                                }
+                            }
+                        }
                     }
                 }
-                if (bestProb > application.probability[indices[i]]) {
-                    application.sudoku[indices[i]] = digit
-                    application.probability[indices[i]] = bestProb
+                else if (solve(solution)) {
+                    application.setSudokuState(SudokuState.Solved)
+                    application.sudoku = sudoku
+                    application.confidence = confidence
+                    for (let i = 0; i < SUDOKU_SIZE; i++) {
+                        if (sudoku[i] == 0) {
+                            application.solution[i] = solution[i]
+                        }
+                        else {
+                            application.solution[i] = 0
+                        }
+                    }
                 }
             }
+        })()
 
-            const sudoku = predictionToSudoku(data, indices)
-            drawSolutionOnCanvas(application.sudoku, solutionCanvas, application.probability)
-            solve(application.sudoku)
-
+        if (application.sudokuState == SudokuState.Solved) {
+            drawSolutionOnCanvas(application.solution, solutionCanvas, application.confidence)
+        
             const solutionImg = cv.imread(solutionCanvas)
             const transformedSolutionImg = new cv.Mat()
             const solutionCorners = [0, 0, solutionImg.cols, 0, solutionImg.cols, solutionImg.rows, 0, solutionImg.rows]
@@ -86,11 +109,12 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
             cv.imshow(transformedSolutionCanvas, transformedSolutionImg)
             solutionImg.delete()
             transformedSolutionImg.delete()
-
-        })()
-
-
-        transformedImg.delete()
+        }
+    }
+    else {
+        if (application.sudokuState == SudokuState.Solved) {
+            application.setSudokuState(SudokuState.Lost)
+        }
     }
 
     img.delete()
@@ -157,7 +181,7 @@ export function transformImgSection(src: cv.Mat, dst: cv.Mat, inputPoints: numbe
 }
 
 
-export function drawSolutionOnCanvas(solution: Uint8Array, canvas: HTMLCanvasElement, probs: Float32Array) {
+export function drawSolutionOnCanvas(solution: Uint8Array, canvas: HTMLCanvasElement, confidence: Float32Array) {
     const ctx = canvas.getContext("2d")
     if (!ctx) {
         console.error("Could not get 2d context from canvas")
@@ -171,7 +195,7 @@ export function drawSolutionOnCanvas(solution: Uint8Array, canvas: HTMLCanvasEle
     
     for (let i = 0; i < SUDOKU_SIZE; i++) {
         if (solution[i] != 0) {
-            ctx.fillStyle = `rgb(${Math.floor((1-probs[i])*255)}, 0, 0)`
+            ctx.fillStyle = `rgb(${Math.floor((1-confidence[i])*255)}, 0, 0)`
             let x = i%SUDOKU_WIDTH
             let y = Math.floor(i/SUDOKU_WIDTH)
             ctx.fillText(solution[i].toString(), size * x + size * 0.2, size * (y+1) - size * 0.1)
@@ -243,27 +267,4 @@ export function setBorder(img: cv.Mat, borderSize: number, val: number) {
     img.roi(bottomROI).setTo(new cv.Scalar(val))
     img.roi(leftROI).setTo(new cv.Scalar(val))
     img.roi(rightROI).setTo(new cv.Scalar(val))
-}
-
-export function predictionToSudoku(prediction: Float32Array | Uint8Array | Int32Array, indices: number[]): Uint8Array {
-    let sudoku = new Uint8Array(SUDOKU_SIZE)
-
-    for (let i = 0; i < prediction.length; i += NUM_CLASSES) {
-
-        // Find index of max value
-        let max_i = i;
-        let max_val = prediction[i];
-        for (let j = i + 1; j < i + NUM_CLASSES; j++) {
-            if (prediction[j] > max_val) {
-                max_val = prediction[j]
-                max_i = j
-            }
-        }
-
-        // Place value in sudoku
-        let index = indices[~~(i / NUM_CLASSES)]
-        sudoku[index] = max_i % NUM_CLASSES + 1
-    }
-
-    return sudoku
 }

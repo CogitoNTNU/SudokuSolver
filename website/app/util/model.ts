@@ -1,6 +1,6 @@
 "use client"
 import { LayersModel, tensor2d } from "@tensorflow/tfjs"
-import { NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, NUM_CLASSES } from "../context/sudokuApplication/Types"
+import { NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE, NUM_CLASSES } from "../context/sudokuApplication/Types"
 
 
 export function predictBatchImages(batchImagesArray: Float32Array, model: LayersModel, n: number) {
@@ -34,4 +34,45 @@ export function formatPredictionData(data: Float32Array | Int32Array | Uint8Arra
         }
     }
     return predictions
+}
+
+
+export function processPredictionData(prediction: Float32Array | Uint8Array | Int32Array, indices: number[]): [Uint8Array, Float32Array, number, number] {
+    const sudoku = new Uint8Array(SUDOKU_SIZE)
+    const confidence = new Float32Array(SUDOKU_SIZE)
+    let averageBestConfidence = 0
+    let worstConfidence = 1
+
+    for (let i = 0; i < prediction.length; i += NUM_CLASSES) {
+        let bestGuess = 0;
+        let highestConfidence = 0
+
+        for (let j = 0; j < NUM_CLASSES; j++) {
+            if (prediction[i + j] > highestConfidence) {
+                bestGuess = j
+                highestConfidence = prediction[i + j]
+            }
+        }
+
+        const index = indices[Math.floor(i/NUM_CLASSES)]
+
+        sudoku[index] = bestGuess + 1
+        confidence[index] = highestConfidence
+
+        averageBestConfidence += highestConfidence / (prediction.length / NUM_CLASSES)
+        if (highestConfidence < worstConfidence) {
+            worstConfidence = highestConfidence
+        }
+    }
+
+    return [sudoku, confidence, averageBestConfidence, worstConfidence]
+}
+
+
+export function countSudokuDiff(sudoku1: Uint8Array, sudoku2: Uint8Array): number {
+    let count = 0
+    for (let i = 0; i < SUDOKU_SIZE; i++) {
+        count += +(sudoku1[i] != sudoku2[i])
+    }
+    return count
 }
