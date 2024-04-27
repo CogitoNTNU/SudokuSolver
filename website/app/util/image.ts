@@ -21,8 +21,6 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
     const img = cv.imread(canvas)
     const sudokuCorners = getCorners(img, canvas)
 
-    console.log(application.sudokuState)
-    
     // Use detected corners if available
     if (sudokuCorners && application.model) {
         sortPointsRadially(sudokuCorners)
@@ -66,7 +64,6 @@ export function drawVideoOnCanvas(video: HTMLVideoElement, canvas: HTMLCanvasEle
                 const solution = sudoku.slice()
 
                 if (application.sudokuState == SudokuState.Solved) {
-                    console.log("diff", countSudokuDiff(sudoku, application.sudoku))
                     if (countSudokuDiff(sudoku, application.sudoku) > 5) {
                         if (solve(solution)) {
                             application.sudoku = sudoku

@@ -2,16 +2,12 @@
 import styles from "./SudokuApplication.module.scss"
 import CameraFeed from "../Camera/CameraFeed"
 import CameraButton from "../Camera/CameraButton"
-import { useRef, useEffect, useCallback, useState } from "react"
-import cv from "@techstark/opencv-js"
+import { useRef, useEffect, useCallback } from "react"
 import { CameraState } from "../Camera/Types" 
 import { drawVideoOnCanvas } from "../../util/image" 
 import { useSudokuApplicationContext } from "../../context/sudokuApplication/SudokuApplication"
-import { processPredictionData } from "@/app/util/model"
 import { loadLayersModel } from "@tensorflow/tfjs"
-import { sudokuImgToBatchImagesArray } from "../../util/image"
-import { predictBatchImages } from "@/app/util/model"
-import { NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, SUDOKU_WIDTH, SUDOKU_HEIGHT } from "@/app/context/sudokuApplication/Types"
+import { SudokuState } from "@/app/context/sudokuApplication/Types"
 
 
 export default function SudokuApplicationElement() {
@@ -23,6 +19,12 @@ export default function SudokuApplicationElement() {
     const solutionCanvasRef = useRef<HTMLCanvasElement | null>(null)
     const transformedSolutionCanvasRef = useRef<HTMLCanvasElement | null>(null)
     const batchCanvasRef = useRef<HTMLCanvasElement | null>(null)
+
+    const constraints: MediaStreamConstraints = {
+        video: {
+            facingMode: { ideal: "environment" }
+        }
+    }
 
 
     const callbackFunction = useCallback(() => {
@@ -62,8 +64,8 @@ export default function SudokuApplicationElement() {
             <div className={styles.sudokuApplication}>
                 <div className={styles.cameraWrapper}>
                     <div className={styles.camera}>
-                        <CameraFeed videoRef={videoRef} cameraState={application.cameraState} setCameraState={application.setCameraState} callbackFunction={callbackFunction}/>
-                        <canvas className={`${styles.overlay} ${application.cameraState == CameraState.Off ? styles.hidden : ""}`} ref={transformedSolutionCanvasRef}></canvas>
+                        <CameraFeed videoRef={videoRef} cameraState={application.cameraState} setCameraState={application.setCameraState} constraints={constraints} callbackFunction={callbackFunction}/>
+                        <canvas className={`${styles.overlay} ${application.sudokuState == SudokuState.Solved ? "" : styles.hidden}`} ref={transformedSolutionCanvasRef}></canvas>
                         <CameraButton/>
                     </div>
                 </div>
