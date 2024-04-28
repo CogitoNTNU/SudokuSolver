@@ -1,4 +1,4 @@
-import { solve } from "@/app/util/solver"
+import { solve } from "@/app/util/solve"
 
 
 addEventListener("message", (event: MessageEvent<Uint8Array>) => {

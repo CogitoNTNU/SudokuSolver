@@ -4,7 +4,7 @@ import CameraFeed from "../Camera/CameraFeed"
 import CameraButton from "../Camera/CameraButton"
 import { useRef, useEffect, useCallback } from "react"
 import { CameraState } from "../Camera/Types" 
-import { drawVideoOnCanvas } from "../../util/image" 
+import { videoCallback } from "../../util/image" 
 import { useSudokuApplicationContext } from "../../context/sudokuApplication/SudokuApplication"
 import { loadLayersModel } from "@tensorflow/tfjs"
 import { SudokuState } from "@/app/context/sudokuApplication/Types"
@@ -15,10 +15,6 @@ export default function SudokuApplicationElement() {
 
     const videoRef = useRef<HTMLVideoElement | null>(null)
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
-    const transformedCanvasRef = useRef<HTMLCanvasElement | null>(null)
-    const solutionCanvasRef = useRef<HTMLCanvasElement | null>(null)
-    const transformedSolutionCanvasRef = useRef<HTMLCanvasElement | null>(null)
-    const batchCanvasRef = useRef<HTMLCanvasElement | null>(null)
 
     const constraints: MediaStreamConstraints = {
         video: {
@@ -29,10 +25,10 @@ export default function SudokuApplicationElement() {
 
     const callbackFunction = useCallback(() => {
         if (application.model) {
-            if (!videoRef.current || !canvasRef.current || !transformedCanvasRef.current || !solutionCanvasRef.current || !transformedSolutionCanvasRef.current || !batchCanvasRef.current) {
+            if (!videoRef.current || !canvasRef.current) {
                 throw new Error("Ref is not used correctly")
             }
-            drawVideoOnCanvas(videoRef.current, canvasRef.current, application, transformedCanvasRef.current, solutionCanvasRef.current, transformedSolutionCanvasRef.current, batchCanvasRef.current)
+            videoCallback(videoRef.current, application, canvasRef.current)
         }
     }, [application.cameraState, application.model, application.sudokuState])
 
@@ -49,11 +45,9 @@ export default function SudokuApplicationElement() {
 
 
     useEffect(() => {
-        if (!transformedSolutionCanvasRef.current || !videoRef.current || !canvasRef.current) {
+        if (!canvasRef.current || !videoRef.current) {
             throw new Error("Ref is not used correctly")
         }
-        transformedSolutionCanvasRef.current.width = videoRef.current.videoWidth
-        transformedSolutionCanvasRef.current.height = videoRef.current.videoHeight
         canvasRef.current.width = videoRef.current.videoWidth
         canvasRef.current.height = videoRef.current.videoHeight
     }, [application.cameraState])
@@ -65,15 +59,11 @@ export default function SudokuApplicationElement() {
                 <div className={styles.cameraWrapper}>
                     <div className={styles.camera}>
                         <CameraFeed videoRef={videoRef} cameraState={application.cameraState} setCameraState={application.setCameraState} constraints={constraints} callbackFunction={callbackFunction}/>
-                        <canvas className={`${styles.overlay} ${application.sudokuState == SudokuState.Solved ? "" : styles.hidden}`} ref={transformedSolutionCanvasRef}></canvas>
+                        <canvas className={`${styles.overlay} ${application.sudokuState == SudokuState.Solved ? "" : styles.hidden}`} ref={canvasRef}></canvas>
                         <CameraButton/>
                     </div>
                 </div>
-                <canvas ref={canvasRef}></canvas>
-                <canvas width={450} height={450} ref={transformedCanvasRef}></canvas>
             </div>
-            <canvas width={300} height={300} ref={solutionCanvasRef}></canvas>
-            <canvas ref={batchCanvasRef}></canvas>
         </>
     )
 }

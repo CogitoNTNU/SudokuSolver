@@ -1,3 +1,5 @@
+import { SudokuApplication, SudokuState, SUDOKU_SIZE } from "../context/sudokuApplication/Types"
+
 /**
  * Solves the given sudoku in-place using recursive backtracking.
  * Returns True if a solution was found, False otherwise.
@@ -77,4 +79,20 @@ export function solve(sudoku: Uint8Array): boolean {
 
     // Call recursive function 
     return _solve(0)
+}
+
+
+export function processSolution(solution: Uint8Array, sudoku: Uint8Array, confidence: Float32Array, application: SudokuApplication) {
+    console.log("solved")
+    application.setSudokuState(SudokuState.Solved)
+    application.sudoku = sudoku
+    application.confidence = confidence
+    for (let i = 0; i < SUDOKU_SIZE; i++) {
+        if (sudoku[i] == 0) {
+            application.solution[i] = solution[i]
+        }
+        else {
+            application.solution[i] = 0
+        }
+    }
 }
