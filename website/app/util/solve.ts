@@ -83,7 +83,6 @@ export function solve(sudoku: Uint8Array): boolean {
 
 
 export function processSolution(solution: Uint8Array, sudoku: Uint8Array, confidence: Float32Array, application: SudokuApplication) {
-    console.log("solved")
     application.setSudokuState(SudokuState.Solved)
     application.sudoku = sudoku
     application.confidence = confidence
@@ -95,4 +94,6 @@ export function processSolution(solution: Uint8Array, sudoku: Uint8Array, confid
             application.solution[i] = 0
         }
     }
+    console.log("change sudoku to", application.sudoku)
+    console.log("change solution to", application.solution)
 }

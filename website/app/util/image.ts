@@ -10,7 +10,6 @@ export function videoCallback(video: HTMLVideoElement, application: SudokuApplic
     const frame = getFrame(video)
     const sudokuCorners = getCorners(frame)
 
-    // Use detected corners if available
     if (sudokuCorners && application.model) {
         sortPointsRadially(sudokuCorners)
         const flatPoints = sudokuCorners.flat()
@@ -31,14 +30,24 @@ export function videoCallback(video: HTMLVideoElement, application: SudokuApplic
                 const solution = sudoku.slice()
 
                 if (application.sudokuState == SudokuState.Solved || application.sudokuState == SudokuState.Lost) {
-                    if (countSudokuDiff(sudoku, application.sudoku) > 10) {
+                    const diff = countSudokuDiff(sudoku, application.sudoku)
+                    if (diff > 10) {
                         if (solve(solution)) {
+                            console.log("diff", diff, application.sudoku)
                             processSolution(solution, sudoku, confidence, application)
+                        }
+                        else {
+                            console.log("wrong new solve")
                         }
                     }
                 }
                 else if (solve(solution)) {
+                    console.log("##########################")
+                    console.log("first solve")
                     processSolution(solution, sudoku, confidence, application)
+                }
+                else {
+                    console.log("wrong solve")
                 }
             }
         })()
@@ -59,6 +68,7 @@ export function videoCallback(video: HTMLVideoElement, application: SudokuApplic
     else {
         if (application.sudokuState == SudokuState.Solved) {
             application.setSudokuState(SudokuState.Lost)
+            console.log("change to lost", application.sudoku, application.solution)
         }
     }
 
@@ -125,29 +135,6 @@ export function transformImgSection(src: cv.Mat, dst: cv.Mat, inputPoints: numbe
 }
 
 
-export function drawSolutionOnCanvas(solution: Uint8Array, canvas: HTMLCanvasElement, confidence: Float32Array) {
-    const ctx = canvas.getContext("2d")
-    if (!ctx) {
-        console.error("Could not get 2d context from canvas")
-        return
-    }
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    const size = canvas.width / 9
-    ctx.font = `${size}px monospace`
-    
-    for (let i = 0; i < SUDOKU_SIZE; i++) {
-        if (solution[i] != 0) {
-            ctx.fillStyle = `rgb(${Math.floor((1-confidence[i])*255)}, 0, 0)`
-            let x = i%SUDOKU_WIDTH
-            let y = Math.floor(i/SUDOKU_WIDTH)
-            ctx.fillText(solution[i].toString(), size * x + size * 0.2, size * (y+1) - size * 0.1)
-        }
-    }
-}
-
-
 export function drawSolutionOnImg(img: cv.Mat, solution: Uint8Array) {
     const color = new cv.Scalar(0, 0, 0, 255)
     const fontFace = cv.FONT_HERSHEY_SIMPLEX
@@ -156,7 +143,6 @@ export function drawSolutionOnImg(img: cv.Mat, solution: Uint8Array) {
         if (solution[i] != 0) {
             let x = (i%SUDOKU_WIDTH) * size
             let y = Math.floor(i/SUDOKU_WIDTH) * size
-            // cv.rectangle(img, new cv.Point(x, y), new cv.Point(x + size, y+ size), color, cv.FILLED)
             cv.putText(img, solution[i].toString(), new cv.Point(x + size*0.2, y+size*0.8), fontFace, 1, color, 2)
         }
     }

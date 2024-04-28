@@ -3,11 +3,10 @@ import styles from "./SudokuApplication.module.scss"
 import CameraFeed from "../Camera/CameraFeed"
 import CameraButton from "../Camera/CameraButton"
 import { useRef, useEffect, useCallback } from "react"
-import { CameraState } from "../Camera/Types" 
 import { videoCallback } from "../../util/image" 
 import { useSudokuApplicationContext } from "../../context/sudokuApplication/SudokuApplication"
 import { loadLayersModel } from "@tensorflow/tfjs"
-import { SudokuState } from "@/app/context/sudokuApplication/Types"
+import { SudokuApplication, SudokuState } from "@/app/context/sudokuApplication/Types"
 
 
 export default function SudokuApplicationElement() {
@@ -23,14 +22,15 @@ export default function SudokuApplicationElement() {
     }
 
 
-    const callbackFunction = useCallback(() => {
+    const callbackFunction = useCallback((application: SudokuApplication) => {
         if (application.model) {
+            console.log(application.sudokuState, application.sudoku)
             if (!videoRef.current || !canvasRef.current) {
                 throw new Error("Ref is not used correctly")
             }
             videoCallback(videoRef.current, application, canvasRef.current)
         }
-    }, [application.cameraState, application.model, application.sudokuState])
+    }, [])
 
 
     useEffect(() => {
@@ -42,6 +42,11 @@ export default function SudokuApplicationElement() {
             console.error('Error loading model:', error)
         })
     }, [])
+
+
+    useEffect(() => {
+        console.log(application)
+    }, [application.sudokuState])
 
 
     useEffect(() => {
@@ -58,7 +63,7 @@ export default function SudokuApplicationElement() {
             <div className={styles.sudokuApplication}>
                 <div className={styles.cameraWrapper}>
                     <div className={styles.camera}>
-                        <CameraFeed videoRef={videoRef} cameraState={application.cameraState} setCameraState={application.setCameraState} constraints={constraints} callbackFunction={callbackFunction}/>
+                        <CameraFeed videoRef={videoRef} cameraState={application.cameraState} setCameraState={application.setCameraState} constraints={constraints} callbackFunction={callbackFunction.bind(null, application)}/>
                         <canvas className={`${styles.overlay} ${application.sudokuState == SudokuState.Solved ? "" : styles.hidden}`} ref={canvasRef}></canvas>
                         <CameraButton/>
                     </div>

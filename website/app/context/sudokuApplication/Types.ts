@@ -16,8 +16,6 @@ export interface SudokuApplication {
 
 export enum SudokuState {
     NotFound,
-    IsPredicting,
-    IsSolving,
     Solved,
     Lost
 }
