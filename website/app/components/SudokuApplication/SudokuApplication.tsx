@@ -6,29 +6,32 @@ import { useRef, useEffect, useCallback } from "react"
 import { videoCallback } from "../../util/image" 
 import { useSudokuApplicationContext } from "../../context/sudokuApplication/SudokuApplication"
 import { loadLayersModel } from "@tensorflow/tfjs"
-import { SudokuApplication, SudokuState } from "@/app/context/sudokuApplication/Types"
+import { SudokuState } from "@/app/context/sudokuApplication/Types"
+import { CameraState } from "../Camera/Types"
 
 
 export default function SudokuApplicationElement() {
     const application = useSudokuApplicationContext()
 
     const videoRef = useRef<HTMLVideoElement | null>(null)
-    const canvasRef = useRef<HTMLCanvasElement | null>(null)
+    const overlayCanvasRef = useRef<HTMLCanvasElement | null>(null)
+    const solutionCanvasRef = useRef<HTMLCanvasElement | null>(null)
 
     const constraints: MediaStreamConstraints = {
         video: {
-            facingMode: { ideal: "environment" }
+            facingMode: { ideal: "environment" },
+            // width: 400,
+            // height: 400
         }
     }
 
 
     const callbackFunction = useCallback(() => {
         if (application.model) {
-            // console.log(application.sudokuState, application.sudoku)
-            if (!videoRef.current || !canvasRef.current) {
+            if (!videoRef.current || !overlayCanvasRef.current || !solutionCanvasRef.current) {
                 throw new Error("Ref is not used correctly")
             }
-            videoCallback(videoRef.current, application, canvasRef.current)
+            videoCallback(videoRef.current, application, overlayCanvasRef.current, solutionCanvasRef.current)
         }
     }, [application.cameraState, application.sudokuState, application.model, application.sudoku, application.solution])
 
@@ -44,17 +47,12 @@ export default function SudokuApplicationElement() {
     }, [])
 
 
-    // useEffect(() => {
-    //     console.log("state changed to ", application.sudokuState, application.sudoku)
-    // }, [application.sudokuState])
-
-
     useEffect(() => {
-        if (!canvasRef.current || !videoRef.current) {
+        if (!overlayCanvasRef.current || !videoRef.current) {
             throw new Error("Ref is not used correctly")
         }
-        canvasRef.current.width = videoRef.current.videoWidth
-        canvasRef.current.height = videoRef.current.videoHeight
+        overlayCanvasRef.current.width = videoRef.current.width
+        overlayCanvasRef.current.height = videoRef.current.height
     }, [application.cameraState])
 
 
@@ -64,7 +62,10 @@ export default function SudokuApplicationElement() {
                 <div className={styles.cameraWrapper}>
                     <div className={styles.camera}>
                         <CameraFeed videoRef={videoRef} cameraState={application.cameraState} setCameraState={application.setCameraState} constraints={constraints} callbackFunction={callbackFunction}/>
-                        <canvas className={`${styles.overlay} ${application.sudokuState == SudokuState.Solved ? "" : styles.hidden}`} ref={canvasRef}></canvas>
+                        <canvas className={`${styles.overlay} ${(application.sudokuState == SudokuState.Solved && application.cameraState == CameraState.On) ? "" : styles.hidden}`} ref={overlayCanvasRef}></canvas>
+                        <canvas className={(application.sudokuState != SudokuState.NotFound && application.cameraState == CameraState.Off ? "" : styles.hidden)} ref={solutionCanvasRef}></canvas>
+                    </div>
+                    <div className={styles.buttonWrapper}>
                         <CameraButton/>
                     </div>
                 </div>

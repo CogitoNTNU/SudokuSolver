@@ -6,7 +6,7 @@ import { sortPointsRadially } from "./sort"
 import { processSolution, solve } from "./solve"
 
 
-export function videoCallback(video: HTMLVideoElement, application: SudokuApplication, transformedSolutionCanvas: HTMLCanvasElement) {
+export async function videoCallback(video: HTMLVideoElement, application: SudokuApplication, overlayCanvas: HTMLCanvasElement, solutionCanvas: HTMLCanvasElement) {
     const frame = getFrame(video)
     const sudokuCorners = getCorners(frame)
 
@@ -18,42 +18,40 @@ export function videoCallback(video: HTMLVideoElement, application: SudokuApplic
         transformImgSection(frame, transformedImg, flatPoints, transformedImgCorners, new cv.Size(SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH, SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT))
 
         const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(transformedImg)
-        transformedImg.delete()
 
-        const prediction = predictBatchImages(batchImagesArray, application.model, indices.length);
+        const prediction = predictBatchImages(batchImagesArray, application.model, indices.length)
 
-        (async () => {
-            const data = await prediction.data()
-            const [sudoku, averageConfidence, worstConfidence] = processPredictionData(data, indices)
+        const data = await prediction.data()
+        const [sudoku, averageConfidence, worstConfidence] = processPredictionData(data, indices)
 
-            if (averageConfidence > 0.9 && worstConfidence > 0.8) {
-                const solution = sudoku.slice()
+        if (averageConfidence > 0.9 && worstConfidence > 0.8) {
+            const solution = sudoku.slice()
 
-                if (application.sudokuState == SudokuState.Solved || application.sudokuState == SudokuState.Lost) {
-                    const diff = countSudokuDiff(sudoku, application.sudoku)
-                    console.log("diff", diff, application.sudoku)
-                    if (diff > 10) {
-                        if (solve(solution)) {
-                            processSolution(solution, sudoku, application)
-                        }
-                        else {
-                            console.log("wrong new solve")
-                        }
+            if (application.sudokuState == SudokuState.Solved || application.sudokuState == SudokuState.Lost) {
+                const diff = countSudokuDiff(sudoku, application.sudoku)
+                if (diff > 5) {
+                    if (solve(solution)) {
+                        processSolution(solution, sudoku, application)
+                        drawSolutionOnImg(transformedImg, solution)
+                        cv.imshow(solutionCanvas, transformedImg)
                     }
                     else {
-                        application.setSudokuState(SudokuState.Solved)
+                        application.setSudokuState(SudokuState.NotFound)
                     }
                 }
-                else if (solve(solution)) {
-                    console.log("##########################")
-                    console.log("first solve")
-                    processSolution(solution, sudoku, application)
-                }
                 else {
-                    console.log("wrong solve")
+                    application.setSudokuState(SudokuState.Solved)
                 }
             }
-        })()
+            else if (solve(solution)) {
+                processSolution(solution, sudoku, application)
+                drawSolutionOnImg(transformedImg, solution)
+                cv.imshow(solutionCanvas, transformedImg)
+            }
+            else {
+                application.setSudokuState(SudokuState.NotFound)
+            }
+        }
 
         if (application.sudokuState == SudokuState.Solved) {
             const solutionImg = new cv.Mat(450, 450, cv.CV_8UC4)
@@ -63,15 +61,16 @@ export function videoCallback(video: HTMLVideoElement, application: SudokuApplic
             const solutionCorners = [0, 0, solutionImg.cols, 0, solutionImg.cols, solutionImg.rows, 0, solutionImg.rows]
             transformImgSection(solutionImg, transformedSolutionImg, solutionCorners, flatPoints, new cv.Size(video.videoWidth, video.videoHeight))
 
-            cv.imshow(transformedSolutionCanvas, transformedSolutionImg)
+            cv.imshow(overlayCanvas, transformedSolutionImg)
             solutionImg.delete()
             transformedSolutionImg.delete()
         }
+
+        transformedImg.delete()
     }
     else {
         if (application.sudokuState == SudokuState.Solved) {
             application.setSudokuState(SudokuState.Lost)
-            console.log("change to lost", application.sudoku, application.solution)
         }
     }
 
