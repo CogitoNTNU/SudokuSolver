@@ -12,6 +12,9 @@ export default function Home() {
     const [cameraState, setCameraState] = useState<CameraState>(CameraState.Off)
     const [sudokuState, setSudokuState] = useState<SudokuState>(SudokuState.NotFound)
     const [model, setModel] = useState<LayersModel | null>(null)
+    const [sudoku, setSudoku] = useState<Uint8Array>(new Uint8Array(SUDOKU_SIZE))
+    const [confidence, setConfidence] = useState<Float32Array>(new Float32Array(SUDOKU_SIZE))
+    const [solution, setSolution] = useState<Uint8Array>(new Uint8Array(SUDOKU_SIZE))
 
     const application = {
         cameraState,
@@ -20,9 +23,12 @@ export default function Home() {
         setSudokuState,
         model,
         setModel,
-        sudoku: new Uint8Array(SUDOKU_SIZE),
-        confidence: new Float32Array(SUDOKU_SIZE),
-        solution: new Uint8Array(SUDOKU_SIZE)
+        sudoku,
+        setSudoku,
+        confidence,
+        setConfidence,
+        solution,
+        setSolution
     }
 
     return (

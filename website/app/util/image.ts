@@ -24,27 +24,30 @@ export function videoCallback(video: HTMLVideoElement, application: SudokuApplic
 
         (async () => {
             const data = await prediction.data()
-            const [sudoku, confidence, averageConfidence, worstConfidence] = processPredictionData(data, indices)
+            const [sudoku, averageConfidence, worstConfidence] = processPredictionData(data, indices)
 
             if (averageConfidence > 0.9 && worstConfidence > 0.8) {
                 const solution = sudoku.slice()
 
                 if (application.sudokuState == SudokuState.Solved || application.sudokuState == SudokuState.Lost) {
                     const diff = countSudokuDiff(sudoku, application.sudoku)
+                    console.log("diff", diff, application.sudoku)
                     if (diff > 10) {
                         if (solve(solution)) {
-                            console.log("diff", diff, application.sudoku)
-                            processSolution(solution, sudoku, confidence, application)
+                            processSolution(solution, sudoku, application)
                         }
                         else {
                             console.log("wrong new solve")
                         }
                     }
+                    else {
+                        application.setSudokuState(SudokuState.Solved)
+                    }
                 }
                 else if (solve(solution)) {
                     console.log("##########################")
                     console.log("first solve")
-                    processSolution(solution, sudoku, confidence, application)
+                    processSolution(solution, sudoku, application)
                 }
                 else {
                     console.log("wrong solve")

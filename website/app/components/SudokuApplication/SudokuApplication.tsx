@@ -22,15 +22,15 @@ export default function SudokuApplicationElement() {
     }
 
 
-    const callbackFunction = useCallback((application: SudokuApplication) => {
+    const callbackFunction = useCallback(() => {
         if (application.model) {
-            console.log(application.sudokuState, application.sudoku)
+            // console.log(application.sudokuState, application.sudoku)
             if (!videoRef.current || !canvasRef.current) {
                 throw new Error("Ref is not used correctly")
             }
             videoCallback(videoRef.current, application, canvasRef.current)
         }
-    }, [])
+    }, [application.cameraState, application.sudokuState, application.model, application.sudoku, application.solution])
 
 
     useEffect(() => {
@@ -44,9 +44,9 @@ export default function SudokuApplicationElement() {
     }, [])
 
 
-    useEffect(() => {
-        console.log(application)
-    }, [application.sudokuState])
+    // useEffect(() => {
+    //     console.log("state changed to ", application.sudokuState, application.sudoku)
+    // }, [application.sudokuState])
 
 
     useEffect(() => {
@@ -63,7 +63,7 @@ export default function SudokuApplicationElement() {
             <div className={styles.sudokuApplication}>
                 <div className={styles.cameraWrapper}>
                     <div className={styles.camera}>
-                        <CameraFeed videoRef={videoRef} cameraState={application.cameraState} setCameraState={application.setCameraState} constraints={constraints} callbackFunction={callbackFunction.bind(null, application)}/>
+                        <CameraFeed videoRef={videoRef} cameraState={application.cameraState} setCameraState={application.setCameraState} constraints={constraints} callbackFunction={callbackFunction}/>
                         <canvas className={`${styles.overlay} ${application.sudokuState == SudokuState.Solved ? "" : styles.hidden}`} ref={canvasRef}></canvas>
                         <CameraButton/>
                     </div>
