@@ -15,6 +15,14 @@ export default function Page() {
 
     const [cameraState, setCameraState] = useState<CameraState>(CameraState.Off)
 
+    const constraints: MediaStreamConstraints = {
+        video: {
+            facingMode: { ideal: "environment" },
+            // width: 400,
+            // height: 400
+        }
+    }
+
     const callbackFunction = useCallback(() => {
         const canvas = canvasRef.current
         const video = videoRef.current
@@ -26,7 +34,7 @@ export default function Page() {
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
     
                 const img = cv.imread(canvas)
-                const corners = getCorners(img, canvas)
+                const corners = getCorners(img)
 
                 if (corners) {
                     sortPointsRadially(corners)
@@ -69,7 +77,7 @@ export default function Page() {
             <Link href={"/data"}>
                 <button>Se på data</button>
             </Link>
-            <CameraFeed videoRef={videoRef} cameraState={cameraState} setCameraState={setCameraState} callbackFunction={callbackFunction}/>
+            <CameraFeed videoRef={videoRef} cameraState={cameraState} setCameraState={setCameraState} constraints={constraints} callbackFunction={callbackFunction}/>
             {
                 cameraState == CameraState.Off 
                 ? 
