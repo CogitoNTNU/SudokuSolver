@@ -13,7 +13,7 @@
     width: 854px;
     height: 480px;
     
-    @media (max-width: 600px) {
+    @media (max-width: 854px) {
         width: 100vw;
         height: 75vh;
     }
@@ -27,6 +27,11 @@
 
 .hidden {
     display: none;
+}
+
+.solutionCanvas {
+    position: absolute;
+    margin: 0 auto;
 }
 
 .buttonWrapper {
