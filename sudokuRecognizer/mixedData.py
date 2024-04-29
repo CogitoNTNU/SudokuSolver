@@ -1,8 +1,13 @@
 import numpy as np
+import tensorflowjs as tfjs
 from keras.datasets import mnist
 from sklearn.preprocessing import LabelBinarizer
 from sklearn.model_selection import train_test_split
-import tensorflowjs as tfjs
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from keras.optimizers import Adam
+from keras.losses import CategoricalCrossentropy
+from keras.metrics import Accuracy
 
 label_path = "website/prisma/seeding/labels.bin"
 digits_path = "website/prisma/seeding/digits.bin"
@@ -52,29 +57,39 @@ y_test = le.transform(y_test)
 print("Train set shapes:", x_train.shape, y_train.shape)
 print("Test set shapes:", x_test.shape, y_test.shape)
 
-from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten, MaxPooling2D, Dropout
 
 # Define the model
 model = Sequential()
-model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(28, 28, 1)))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+    
+IMAGE_WIDTH = 28
+IMAGE_HEIGHT = 28
+IMAGE_CHANNELS = 1
+
+model.add(Conv2D(filters=8, kernel_size=5, strides=1, activation='relu', 
+                    kernel_initializer='glorot_uniform', 
+                    input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS)))
+
+model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+
+model.add(Conv2D(filters=16, kernel_size=5, strides=1, activation='relu', 
+                    kernel_initializer='glorot_uniform'))
+
+model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+
 model.add(Flatten())
-model.add(Dense(128, activation='relu'))
-model.add(Dropout(0.5))
-model.add(Dense(9, activation='softmax'))  # 10 classes for the digits 1-9
 
-# Compile the model
-model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+model.add(Dense(units=9, activation='softmax',
+                kernel_initializer='glorot_uniform'))
 
-# Train the model
-history = model.fit(x_train, y_train, validation_split=0.2, epochs=10, batch_size=32)
+model.compile(optimizer=Adam(),
+                loss=CategoricalCrossentropy(),
+                metrics=[Accuracy()])
 
-# Evaluate the model
-loss, accuracy = model.evaluate(x_test, y_test)  # You'll need to preprocess x_test and y_test like x_train and y_train
-print(f"Test loss: {loss}, Test accuracy: {accuracy}")
+model.compile(optimizer="adam", loss="categorical_crossentropy",
+              metrics=["accuracy"])
 
-model_path = "website/public/models"  # Make sure the path uses forward slashes or raw string literals for Windows paths
-tfjs.converters.save_keras_model(model, model_path)
+model.fit(x_train, y_train, validation_data=(x_train, y_train),
+          batch_size=64, epochs=8, shuffle=True, verbose=1)
+
+
+tfjs.converters.save_keras_model(model, "model")

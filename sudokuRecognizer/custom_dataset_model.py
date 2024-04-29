@@ -4,7 +4,6 @@ from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
 from keras.optimizers import Adam
 from keras.losses import CategoricalCrossentropy
 from keras.metrics import Accuracy
-from keras.preprocessing.image import ImageDataGenerator
 from sklearn.preprocessing import LabelBinarizer
 import tensorflowjs as tfjs
 
@@ -62,19 +61,6 @@ y_test = le.transform(y_test)
 
 x_train = np.expand_dims(x_train, axis=-1)  # Add an extra dimension for the channels
 x_test = np.expand_dims(x_test, axis=-1)
-
-datagen = ImageDataGenerator(
-            featurewise_center=False,  # set input mean to 0 over the dataset
-            samplewise_center=False,  # set each sample mean to 0
-            featurewise_std_normalization=False,  # divide inputs by std of the dataset
-            samplewise_std_normalization=False,  # divide each input by its std
-            zca_whitening=False,  # apply ZCA whitening
-            # rotation_range=10,  # randomly rotate images in the range (degrees, 0 to 180)
-            # zoom_range = 0.1, # Randomly zoom image 
-            width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
-            height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
-            horizontal_flip=False,  # randomly flip images
-            vertical_flip=False)  # randomly flip images
 
 # Define model
 model = Sequential()
