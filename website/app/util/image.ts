@@ -57,7 +57,7 @@ export async function videoCallback(video: HTMLVideoElement, application: Sudoku
 
 
         if (application.sudokuState == SudokuState.Solved) {
-            const solutionImg = new cv.Mat(450, 450, cv.CV_8UC4)
+            const solutionImg = new cv.Mat(400, 400, cv.CV_8UC4)
             solutionImg.setTo(new cv.Scalar(0, 0, 0, 0))
             drawSolutionOnImg(solutionImg, application.solution)
             const transformedSolutionImg = new cv.Mat()
@@ -144,11 +144,12 @@ export function drawSolutionOnImg(img: cv.Mat, solution: Uint8Array) {
     const color = new cv.Scalar(0, 0, 0, 255)
     const fontFace = cv.FONT_HERSHEY_SIMPLEX
     const size = img.cols / SUDOKU_WIDTH
+    const fontScale = size / NUMBER_IMAGE_WIDTH * 0.75
     for (let i = 0; i < SUDOKU_SIZE; i++) {
         if (solution[i] != 0) {
             let x = (i%SUDOKU_WIDTH) * size
             let y = Math.floor(i/SUDOKU_WIDTH) * size
-            cv.putText(img, solution[i].toString(), new cv.Point(x + size*0.2, y+size*0.8), fontFace, 1, color, 2)
+            cv.putText(img, solution[i].toString(), new cv.Point(x + size*0.2, y+size*0.8), fontFace, fontScale, color, 2)
         }
     }
 }

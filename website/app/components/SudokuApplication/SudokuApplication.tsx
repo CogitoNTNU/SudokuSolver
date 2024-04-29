@@ -49,7 +49,7 @@ export default function SudokuApplicationElement() {
         const width = cameraRef.current.clientWidth
         const height = cameraRef.current.clientHeight
 
-        // Cursed code because safari on ios request camera is if the phone is in landscape
+        // Cursed code because safari on ios request camera as if the phone is in landscape
         const isPortrait = height > width
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
