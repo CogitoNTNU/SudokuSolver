@@ -19,39 +19,42 @@ export async function videoCallback(video: HTMLVideoElement, application: Sudoku
 
         const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(transformedImg)
 
-        const prediction = predictBatchImages(batchImagesArray, application.model, indices.length)
-
-        const data = await prediction.data()
-        const [sudoku, averageConfidence, worstConfidence] = processPredictionData(data, indices)
-
-        if (averageConfidence > 0.9 && worstConfidence > 0.8) {
-            const solution = sudoku.slice()
-
-            if (application.sudokuState == SudokuState.Solved || application.sudokuState == SudokuState.Lost) {
-                const diff = countSudokuDiff(sudoku, application.sudoku)
-                if (diff > 5) {
-                    if (solve(solution)) {
-                        processSolution(solution, sudoku, application)
-                        drawSolutionOnImg(transformedImg, solution)
-                        cv.imshow(solutionCanvas, transformedImg)
+        if (indices.length) {
+            const prediction = predictBatchImages(batchImagesArray, application.model, indices.length)
+    
+            const data = await prediction.data()
+            const [sudoku, averageConfidence, worstConfidence] = processPredictionData(data, indices)
+    
+            if (averageConfidence > 0.9 && worstConfidence > 0.8) {
+                const solution = sudoku.slice()
+    
+                if (application.sudokuState == SudokuState.Solved || application.sudokuState == SudokuState.Lost) {
+                    const diff = countSudokuDiff(sudoku, application.sudoku)
+                    if (diff > 5) {
+                        if (solve(solution)) {
+                            processSolution(solution, sudoku, application)
+                            drawSolutionOnImg(transformedImg, solution)
+                            cv.imshow(solutionCanvas, transformedImg)
+                        }
+                        else {
+                            application.setSudokuState(SudokuState.NotFound)
+                        }
                     }
                     else {
-                        application.setSudokuState(SudokuState.NotFound)
+                        application.setSudokuState(SudokuState.Solved)
                     }
                 }
+                else if (solve(solution)) {
+                    processSolution(solution, sudoku, application)
+                    drawSolutionOnImg(transformedImg, solution)
+                    cv.imshow(solutionCanvas, transformedImg)
+                }
                 else {
-                    application.setSudokuState(SudokuState.Solved)
+                    application.setSudokuState(SudokuState.NotFound)
                 }
             }
-            else if (solve(solution)) {
-                processSolution(solution, sudoku, application)
-                drawSolutionOnImg(transformedImg, solution)
-                cv.imshow(solutionCanvas, transformedImg)
-            }
-            else {
-                application.setSudokuState(SudokuState.NotFound)
-            }
         }
+
 
         if (application.sudokuState == SudokuState.Solved) {
             const solutionImg = new cv.Mat(450, 450, cv.CV_8UC4)
