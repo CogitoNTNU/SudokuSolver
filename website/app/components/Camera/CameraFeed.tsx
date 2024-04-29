@@ -42,7 +42,7 @@ export default function CameraFeed(props: CameraFeedProps) {
             return
         })
         video.addEventListener("loadedmetadata", handleVideoPlay)
-    }, [])
+    }, [props.constraints])
 
 
     const stop = useCallback(() => {
