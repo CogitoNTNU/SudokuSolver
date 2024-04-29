@@ -3,38 +3,37 @@ import styles from "./SudokuApplication.module.scss"
 import CameraFeed from "../Camera/CameraFeed"
 import CameraButton from "../Camera/CameraButton"
 import { useRef, useEffect, useCallback } from "react"
-import { CameraState } from "../Camera/Types" 
-import { drawVideoOnCanvas } from "../../util/image" 
+import { videoCallback } from "../../util/image" 
 import { useSudokuApplicationContext } from "../../context/sudokuApplication/SudokuApplication"
 import { loadLayersModel } from "@tensorflow/tfjs"
 import { SudokuState } from "@/app/context/sudokuApplication/Types"
+import { CameraState } from "../Camera/Types"
 
 
 export default function SudokuApplicationElement() {
     const application = useSudokuApplicationContext()
 
     const videoRef = useRef<HTMLVideoElement | null>(null)
-    const canvasRef = useRef<HTMLCanvasElement | null>(null)
-    const transformedCanvasRef = useRef<HTMLCanvasElement | null>(null)
+    const overlayCanvasRef = useRef<HTMLCanvasElement | null>(null)
     const solutionCanvasRef = useRef<HTMLCanvasElement | null>(null)
-    const transformedSolutionCanvasRef = useRef<HTMLCanvasElement | null>(null)
-    const batchCanvasRef = useRef<HTMLCanvasElement | null>(null)
 
     const constraints: MediaStreamConstraints = {
         video: {
-            facingMode: { ideal: "environment" }
+            facingMode: { ideal: "environment" },
+            // width: 400,
+            // height: 400
         }
     }
 
 
     const callbackFunction = useCallback(() => {
         if (application.model) {
-            if (!videoRef.current || !canvasRef.current || !transformedCanvasRef.current || !solutionCanvasRef.current || !transformedSolutionCanvasRef.current || !batchCanvasRef.current) {
+            if (!videoRef.current || !overlayCanvasRef.current || !solutionCanvasRef.current) {
                 throw new Error("Ref is not used correctly")
             }
-            drawVideoOnCanvas(videoRef.current, canvasRef.current, application, transformedCanvasRef.current, solutionCanvasRef.current, transformedSolutionCanvasRef.current, batchCanvasRef.current)
+            videoCallback(videoRef.current, application, overlayCanvasRef.current, solutionCanvasRef.current)
         }
-    }, [application.cameraState, application.model, application.sudokuState])
+    }, [application.cameraState, application.sudokuState, application.model, application.sudoku, application.solution])
 
 
     useEffect(() => {
@@ -49,13 +48,11 @@ export default function SudokuApplicationElement() {
 
 
     useEffect(() => {
-        if (!transformedSolutionCanvasRef.current || !videoRef.current || !canvasRef.current) {
+        if (!overlayCanvasRef.current || !videoRef.current) {
             throw new Error("Ref is not used correctly")
         }
-        transformedSolutionCanvasRef.current.width = videoRef.current.videoWidth
-        transformedSolutionCanvasRef.current.height = videoRef.current.videoHeight
-        canvasRef.current.width = videoRef.current.videoWidth
-        canvasRef.current.height = videoRef.current.videoHeight
+        overlayCanvasRef.current.width = videoRef.current.width
+        overlayCanvasRef.current.height = videoRef.current.height
     }, [application.cameraState])
 
 
@@ -65,15 +62,14 @@ export default function SudokuApplicationElement() {
                 <div className={styles.cameraWrapper}>
                     <div className={styles.camera}>
                         <CameraFeed videoRef={videoRef} cameraState={application.cameraState} setCameraState={application.setCameraState} constraints={constraints} callbackFunction={callbackFunction}/>
-                        <canvas className={`${styles.overlay} ${application.sudokuState == SudokuState.Solved ? "" : styles.hidden}`} ref={transformedSolutionCanvasRef}></canvas>
+                        <canvas className={`${styles.overlay} ${(application.sudokuState == SudokuState.Solved && application.cameraState == CameraState.On) ? "" : styles.hidden}`} ref={overlayCanvasRef}></canvas>
+                        <canvas className={(application.sudokuState != SudokuState.NotFound && application.cameraState == CameraState.Off ? "" : styles.hidden)} ref={solutionCanvasRef}></canvas>
+                    </div>
+                    <div className={styles.buttonWrapper}>
                         <CameraButton/>
                     </div>
                 </div>
-                <canvas ref={canvasRef}></canvas>
-                <canvas width={450} height={450} ref={transformedCanvasRef}></canvas>
             </div>
-            <canvas width={300} height={300} ref={solutionCanvasRef}></canvas>
-            <canvas ref={batchCanvasRef}></canvas>
         </>
     )
 }

@@ -10,14 +10,13 @@ export interface SudokuApplication {
     model: LayersModel | null,
     setModel: Dispatch<SetStateAction<LayersModel | null>>,
     sudoku: Uint8Array,
-    confidence: Float32Array,
+    setSudoku: Dispatch<Uint8Array>,
     solution: Uint8Array
+    setSolution: Dispatch<Uint8Array>
 }
 
 export enum SudokuState {
     NotFound,
-    IsPredicting,
-    IsSolving,
     Solved,
     Lost
 }

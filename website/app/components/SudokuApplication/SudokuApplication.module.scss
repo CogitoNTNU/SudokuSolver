@@ -1,25 +1,28 @@
-.sudokuApplication {
-}
-
 .cameraWrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .camera {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 .hidden {
-  display: none;
+    display: none;
+}
+
+.buttonWrapper {
+    position: absolute;
+    bottom: 1em;
 }

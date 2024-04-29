@@ -37,9 +37,8 @@ export function formatPredictionData(data: Float32Array | Int32Array | Uint8Arra
 }
 
 
-export function processPredictionData(prediction: Float32Array | Uint8Array | Int32Array, indices: number[]): [Uint8Array, Float32Array, number, number] {
+export function processPredictionData(prediction: Float32Array | Uint8Array | Int32Array, indices: number[]): [Uint8Array, number, number] {
     const sudoku = new Uint8Array(SUDOKU_SIZE)
-    const confidence = new Float32Array(SUDOKU_SIZE)
     let averageBestConfidence = 0
     let worstConfidence = 1
 
@@ -57,7 +56,6 @@ export function processPredictionData(prediction: Float32Array | Uint8Array | In
         const index = indices[Math.floor(i/NUM_CLASSES)]
 
         sudoku[index] = bestGuess + 1
-        confidence[index] = highestConfidence
 
         averageBestConfidence += highestConfidence / (prediction.length / NUM_CLASSES)
         if (highestConfidence < worstConfidence) {
@@ -65,7 +63,7 @@ export function processPredictionData(prediction: Float32Array | Uint8Array | In
         }
     }
 
-    return [sudoku, confidence, averageBestConfidence, worstConfidence]
+    return [sudoku, averageBestConfidence, worstConfidence]
 }
 
 
