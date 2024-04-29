@@ -2,8 +2,8 @@ import numpy as np
 from keras.datasets import mnist
 from sklearn.preprocessing import LabelBinarizer
 
-label_path = "website/prisma/seeding/labels.bin"
-digits_path = "website/prisma/seeding/digits.bin"
+label_path = "labels.bin"
+digits_path = "digits.bin"
 
 # Read labels and digits
 labels = np.fromfile(label_path, dtype=np.uint8)
@@ -45,8 +45,13 @@ y_train = y_train[shuffle_indices]
 le = LabelBinarizer()
 y_train = le.fit_transform(y_train)
 
+
 # Normalize
 x_train = x_train / 255.0
+
+#Reshape to fit model
+x_train = x_train.reshape(x_train.shape[0], 28, 28, 1)
+
 
 print("x_train shape:", x_train.shape)
 print("y_train shape:", y_train.shape)
