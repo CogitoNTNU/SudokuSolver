@@ -3,7 +3,7 @@ import styles from "./page.module.scss"
 import { useEffect, useState, useRef } from "react"
 import { loadLayersModel, LayersModel } from "@tensorflow/tfjs"
 import cv from "@techstark/opencv-js"
-import { NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_SIZE, SUDOKU_HEIGHT, SUDOKU_WIDTH } from "../context/sudokuApplication/Types"
+import { DIGIT_IMAGE_HEIGHT, DIGIT_IMAGE_WIDTH, DIGIT_IMAGE_SIZE, SUDOKU_HEIGHT, SUDOKU_WIDTH } from "../context/sudokuApplication/Types"
 import { sudokuImgToBatchImagesArray } from "../util/image"
 import { predictBatchImages } from "../util/model"
 
@@ -62,7 +62,7 @@ function btnClick() {
         console.log(data)
     })()
     
-    const imgData = new ImageData(NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH, NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT)
+    const imgData = new ImageData(DIGIT_IMAGE_WIDTH * SUDOKU_WIDTH, DIGIT_IMAGE_HEIGHT * SUDOKU_HEIGHT)
     let index = 0
     for (let w = 0; w < 9; w++) {
         for (let y = 0; y < 28; y++) {
@@ -80,8 +80,8 @@ function btnClick() {
         }
     }
     
-    canvas.width = NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH
-    canvas.height = NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT
+    canvas.width = DIGIT_IMAGE_WIDTH * SUDOKU_WIDTH
+    canvas.height = DIGIT_IMAGE_HEIGHT * SUDOKU_HEIGHT
     ctx.putImageData(imgData, 0, 0)
 }
 
@@ -114,14 +114,14 @@ return (
                 ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
                 
                 const img = cv.imread(canvas)
-                cv.resize(img, img, new cv.Size(SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH, SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT))
+                cv.resize(img, img, new cv.Size(SUDOKU_WIDTH*DIGIT_IMAGE_WIDTH, SUDOKU_HEIGHT*DIGIT_IMAGE_HEIGHT))
                 cv.imshow(canvas, img)
                 const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(img)
                 img.delete()
-                const section = batchImagesArray.slice(NUMBER_IMAGE_SIZE*value, NUMBER_IMAGE_SIZE*(value+1))
+                const section = batchImagesArray.slice(DIGIT_IMAGE_SIZE*value, DIGIT_IMAGE_SIZE*(value+1))
     
-                const imgData = new ImageData(NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT)
-                for (let i = 0; i < NUMBER_IMAGE_SIZE; i++) {
+                const imgData = new ImageData(DIGIT_IMAGE_WIDTH, DIGIT_IMAGE_HEIGHT)
+                for (let i = 0; i < DIGIT_IMAGE_SIZE; i++) {
                     const color = section[i]*255
                     imgData.data[i*4] = color
                     imgData.data[i*4+1] = color
@@ -152,14 +152,14 @@ return (
             ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
             
             const img = cv.imread(canvas)
-            cv.resize(img, img, new cv.Size(SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH, SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT))
+            cv.resize(img, img, new cv.Size(SUDOKU_WIDTH*DIGIT_IMAGE_WIDTH, SUDOKU_HEIGHT*DIGIT_IMAGE_HEIGHT))
             cv.imshow(canvas, img)
             const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(img)
             img.delete()
-            const section = batchImagesArray.slice(NUMBER_IMAGE_SIZE*input, NUMBER_IMAGE_SIZE*(input+1))
+            const section = batchImagesArray.slice(DIGIT_IMAGE_SIZE*input, DIGIT_IMAGE_SIZE*(input+1))
 
-            const imgData = new ImageData(NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT)
-            for (let i = 0; i < NUMBER_IMAGE_SIZE; i++) {
+            const imgData = new ImageData(DIGIT_IMAGE_WIDTH, DIGIT_IMAGE_HEIGHT)
+            for (let i = 0; i < DIGIT_IMAGE_SIZE; i++) {
                 const color = section[i]*255
                 imgData.data[i*4] = color
                 imgData.data[i*4+1] = color

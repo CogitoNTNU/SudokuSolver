@@ -1,11 +1,11 @@
 "use client"
 import { LayersModel, tensor2d } from "@tensorflow/tfjs"
-import { NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE, NUM_CLASSES } from "../context/sudokuApplication/Types"
+import { DIGIT_IMAGE_WIDTH, DIGIT_IMAGE_HEIGHT, DIGIT_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE, NUM_CLASSES } from "../context/sudokuApplication/Types"
 
 
 export function predictBatchImages(batchImagesArray: Float32Array, model: LayersModel, n: number) {
-    const batchImagesTensor = tensor2d(batchImagesArray, [n, NUMBER_IMAGE_SIZE])
-    const predictionData = batchImagesTensor.reshape([n, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, 1])
+    const batchImagesTensor = tensor2d(batchImagesArray, [n, DIGIT_IMAGE_SIZE])
+    const predictionData = batchImagesTensor.reshape([n, DIGIT_IMAGE_WIDTH, DIGIT_IMAGE_HEIGHT, 1])
     const prediction = model.predict(predictionData)
     predictionData.dispose()
     if (Array.isArray(prediction)) {

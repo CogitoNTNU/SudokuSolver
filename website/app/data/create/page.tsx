@@ -6,7 +6,7 @@ import { CameraState } from "@/app/components/Camera/Types"
 import cv from "@techstark/opencv-js"
 import { getCorners, sudokuImgToBatchImagesArray, transformImgSection } from "@/app/util/image"
 import { sortPointsRadially } from "@/app/util/sort"
-import { NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_WIDTH, SUDOKU_WIDTH, SUDOKU_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_SIZE } from "@/app/context/sudokuApplication/Types"
+import { DIGIT_IMAGE_HEIGHT, DIGIT_IMAGE_WIDTH, SUDOKU_WIDTH, SUDOKU_HEIGHT, DIGIT_IMAGE_SIZE } from "@/app/context/sudokuApplication/Types"
 import Link from "next/link"
 
 export default function Page() {
@@ -43,7 +43,7 @@ export default function Page() {
 
                     const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(img)
                     
-                    const imgData = new ImageData(NUMBER_IMAGE_WIDTH * SUDOKU_WIDTH, NUMBER_IMAGE_HEIGHT * SUDOKU_HEIGHT)
+                    const imgData = new ImageData(DIGIT_IMAGE_WIDTH * SUDOKU_WIDTH, DIGIT_IMAGE_HEIGHT * SUDOKU_HEIGHT)
                     let index = 0
                     for (let w = 0; w < 9; w++) {
                         for (let y = 0; y < 28; y++) {
@@ -60,8 +60,8 @@ export default function Page() {
                             }
                         }
                     }
-                    canvas.width = SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH
-                    canvas.height = SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT
+                    canvas.width = SUDOKU_WIDTH*DIGIT_IMAGE_WIDTH
+                    canvas.height = SUDOKU_HEIGHT*DIGIT_IMAGE_HEIGHT
                     imgData.data[imgData.data.length-1] = indices.length
                     ctx.putImageData(imgData, 0, 0)
                 }
@@ -97,9 +97,9 @@ export default function Page() {
                         for (let i = 0; i < l; i++) {
                             const x = i%SUDOKU_WIDTH
                             const y = Math.floor(i/SUDOKU_WIDTH)
-                            const pixeldata = ctx.getImageData(x*NUMBER_IMAGE_WIDTH, y*NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT).data
-                            const data = new Uint8Array(NUMBER_IMAGE_SIZE)
-                            for (let j = 0; j < NUMBER_IMAGE_SIZE; j++) {
+                            const pixeldata = ctx.getImageData(x*DIGIT_IMAGE_WIDTH, y*DIGIT_IMAGE_HEIGHT, DIGIT_IMAGE_WIDTH, DIGIT_IMAGE_HEIGHT).data
+                            const data = new Uint8Array(DIGIT_IMAGE_SIZE)
+                            for (let j = 0; j < DIGIT_IMAGE_SIZE; j++) {
                                 data[j] = pixeldata[j*4]
                             }
                             console.log(pixeldata)

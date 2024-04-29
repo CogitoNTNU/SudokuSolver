@@ -21,9 +21,9 @@ export enum SudokuState {
     Lost
 }
 
-export const NUMBER_IMAGE_WIDTH = 28
-export const NUMBER_IMAGE_HEIGHT = 28
-export const NUMBER_IMAGE_SIZE = NUMBER_IMAGE_WIDTH * NUMBER_IMAGE_HEIGHT
+export const DIGIT_IMAGE_WIDTH = 28
+export const DIGIT_IMAGE_HEIGHT = 28
+export const DIGIT_IMAGE_SIZE = DIGIT_IMAGE_WIDTH * DIGIT_IMAGE_HEIGHT
 
 export const SUDOKU_HEIGHT = 9
 export const SUDOKU_WIDTH = 9

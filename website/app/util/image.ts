@@ -1,6 +1,6 @@
 "use client"
 import cv from "@techstark/opencv-js"
-import { SudokuApplication, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE, SudokuState } from "../context/sudokuApplication/Types"
+import { SudokuApplication, DIGIT_IMAGE_WIDTH, DIGIT_IMAGE_HEIGHT, DIGIT_IMAGE_SIZE, SUDOKU_WIDTH, SUDOKU_HEIGHT, SUDOKU_SIZE, SudokuState } from "../context/sudokuApplication/Types"
 import { countSudokuDiff, predictBatchImages, processPredictionData } from "./model"
 import { sortPointsRadially } from "./sort"
 import { processSolution, solve } from "./solve"
@@ -14,8 +14,8 @@ export async function videoCallback(video: HTMLVideoElement, application: Sudoku
         sortPointsRadially(sudokuCorners)
         const flatPoints = sudokuCorners.flat()
         const transformedImg = new cv.Mat()
-        const transformedImgCorners = [0, 0, SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH, 0, SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH, SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT, 0, SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT]
-        transformImgSection(frame, transformedImg, flatPoints, transformedImgCorners, new cv.Size(SUDOKU_WIDTH*NUMBER_IMAGE_WIDTH, SUDOKU_HEIGHT*NUMBER_IMAGE_HEIGHT))
+        const transformedImgCorners = [0, 0, SUDOKU_WIDTH*DIGIT_IMAGE_WIDTH, 0, SUDOKU_WIDTH*DIGIT_IMAGE_WIDTH, SUDOKU_HEIGHT*DIGIT_IMAGE_HEIGHT, 0, SUDOKU_HEIGHT*DIGIT_IMAGE_HEIGHT]
+        transformImgSection(frame, transformedImg, flatPoints, transformedImgCorners, new cv.Size(SUDOKU_WIDTH*DIGIT_IMAGE_WIDTH, SUDOKU_HEIGHT*DIGIT_IMAGE_HEIGHT))
 
         const [batchImagesArray, indices] = sudokuImgToBatchImagesArray(transformedImg)
 
@@ -144,7 +144,7 @@ export function drawSolutionOnImg(img: cv.Mat, solution: Uint8Array) {
     const color = new cv.Scalar(0, 0, 0, 255)
     const fontFace = cv.FONT_HERSHEY_SIMPLEX
     const size = img.cols / SUDOKU_WIDTH
-    const fontScale = size / NUMBER_IMAGE_WIDTH * 0.75
+    const fontScale = size / DIGIT_IMAGE_WIDTH * 0.75
     for (let i = 0; i < SUDOKU_SIZE; i++) {
         if (solution[i] != 0) {
             let x = (i%SUDOKU_WIDTH) * size
@@ -156,10 +156,10 @@ export function drawSolutionOnImg(img: cv.Mat, solution: Uint8Array) {
 
 
 export function sudokuImgToBatchImagesArray(img: cv.Mat): [Float32Array, number[]] {
-    const batchImagesArray = new Float32Array(SUDOKU_SIZE * NUMBER_IMAGE_SIZE)
+    const batchImagesArray = new Float32Array(SUDOKU_SIZE * DIGIT_IMAGE_SIZE)
 
     const resizedImg = new cv.Mat()
-    cv.resize(img, resizedImg, new cv.Size(SUDOKU_WIDTH * NUMBER_IMAGE_WIDTH, SUDOKU_HEIGHT * NUMBER_IMAGE_HEIGHT))
+    cv.resize(img, resizedImg, new cv.Size(SUDOKU_WIDTH * DIGIT_IMAGE_WIDTH, SUDOKU_HEIGHT * DIGIT_IMAGE_HEIGHT))
 
     cv.cvtColor(resizedImg, resizedImg, cv.COLOR_BGR2GRAY)
     cv.bitwise_not(resizedImg, resizedImg)
@@ -171,7 +171,7 @@ export function sudokuImgToBatchImagesArray(img: cv.Mat): [Float32Array, number[
 
     for (let y = 0; y < SUDOKU_HEIGHT; y++) {
         for (let x = 0; x < SUDOKU_WIDTH; x++) {
-            const rect = resizedImg.roi(new cv.Rect(x * NUMBER_IMAGE_WIDTH, y * NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT))
+            const rect = resizedImg.roi(new cv.Rect(x * DIGIT_IMAGE_WIDTH, y * DIGIT_IMAGE_HEIGHT, DIGIT_IMAGE_WIDTH, DIGIT_IMAGE_HEIGHT))
 
             setBorder(rect, 5, 0)
             cv.dilate(rect, rect, dilateKernel)
@@ -186,8 +186,8 @@ export function sudokuImgToBatchImagesArray(img: cv.Mat): [Float32Array, number[
             }
 
             rect.convertTo(rect, cv.CV_32F, 1 / 255)
-            batchImagesArray.set(rect.data32F, (y * SUDOKU_WIDTH + x) * NUMBER_IMAGE_SIZE)
-            batchImagesArray.set(rect.data32F, indices.length*NUMBER_IMAGE_SIZE)
+            batchImagesArray.set(rect.data32F, (y * SUDOKU_WIDTH + x) * DIGIT_IMAGE_SIZE)
+            batchImagesArray.set(rect.data32F, indices.length*DIGIT_IMAGE_SIZE)
             indices.push(y*SUDOKU_WIDTH+x)
 
             rect.delete()
@@ -196,7 +196,7 @@ export function sudokuImgToBatchImagesArray(img: cv.Mat): [Float32Array, number[
 
     dilateKernel.delete()
     resizedImg.delete()
-    return [batchImagesArray.slice(0, indices.length*NUMBER_IMAGE_SIZE), indices]
+    return [batchImagesArray.slice(0, indices.length*DIGIT_IMAGE_SIZE), indices]
 }
 
 
@@ -209,10 +209,10 @@ export function filter(src: cv.Mat, dst: cv.Mat, thresh: number, maxval: number)
 
 
 export function setBorder(img: cv.Mat, borderSize: number, val: number) {
-    let topROI = new cv.Rect(0, 0, img.cols, borderSize)
-    let bottomROI = new cv.Rect(0, img.rows - borderSize, img.cols, borderSize)
-    let leftROI = new cv.Rect(0, 0, borderSize, img.rows)
-    let rightROI = new cv.Rect(img.cols - borderSize, 0, borderSize, img.rows)
+    const topROI = new cv.Rect(0, 0, img.cols, borderSize)
+    const bottomROI = new cv.Rect(0, img.rows - borderSize, img.cols, borderSize)
+    const leftROI = new cv.Rect(0, 0, borderSize, img.rows)
+    const rightROI = new cv.Rect(img.cols - borderSize, 0, borderSize, img.rows)
 
     img.roi(topROI).setTo(new cv.Scalar(val))
     img.roi(bottomROI).setTo(new cv.Scalar(val))

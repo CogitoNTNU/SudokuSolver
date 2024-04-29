@@ -1,7 +1,7 @@
 "use client"
 import styles from "./page.module.scss"
 import Link from "next/link"
-import { NUMBER_IMAGE_HEIGHT, NUMBER_IMAGE_SIZE, NUMBER_IMAGE_WIDTH } from "../context/sudokuApplication/Types"
+import { DIGIT_IMAGE_HEIGHT, DIGIT_IMAGE_SIZE, DIGIT_IMAGE_WIDTH } from "../context/sudokuApplication/Types"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { handleForm } from "./handleForm"
 
@@ -44,8 +44,8 @@ export default function Page() {
         const data = result.data.data
         const label = result.label
         setLabelVal(label ? label : 255)
-        const imgData = new ImageData(NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT)
-        for (let i = 0; i < NUMBER_IMAGE_SIZE; i++) {
+        const imgData = new ImageData(DIGIT_IMAGE_WIDTH, DIGIT_IMAGE_HEIGHT)
+        for (let i = 0; i < DIGIT_IMAGE_SIZE; i++) {
             imgData.data[i*4] = data[i]
             imgData.data[i*4+1] = data[i]
             imgData.data[i*4+2] = data[i]
@@ -88,11 +88,11 @@ export default function Page() {
                 })
                 if (response.ok) {
                     const result = await response.json()
-                    const digitsData = new Uint8Array(result.length*NUMBER_IMAGE_SIZE)
+                    const digitsData = new Uint8Array(result.length*DIGIT_IMAGE_SIZE)
                     const labelData = new Uint8Array(result.length)
 
                     for (let i = 0; i < result.length; i++) {
-                        digitsData.set(result[i].data.data, i*NUMBER_IMAGE_SIZE)
+                        digitsData.set(result[i].data.data, i*DIGIT_IMAGE_SIZE)
                         labelData[i] = parseInt(result[i].label)
                     }
 
@@ -166,7 +166,7 @@ function CanvasList({ images }: { images: {
     return (
       <div>
         {images.map((image) => (
-          <canvas id={String(image.id)} key={image.id} width={NUMBER_IMAGE_WIDTH} height={NUMBER_IMAGE_HEIGHT} ref={(canvas) => {renderImageOnCanvas(canvas, image)}}></canvas>
+          <canvas id={String(image.id)} key={image.id} width={DIGIT_IMAGE_WIDTH} height={DIGIT_IMAGE_HEIGHT} ref={(canvas) => {renderImageOnCanvas(canvas, image)}}></canvas>
         ))}
       </div>
     )
@@ -180,9 +180,9 @@ function renderImageOnCanvas(canvas: HTMLCanvasElement | null, image: {
     if (canvas) {
         const ctx = canvas.getContext("2d")
         if (ctx) {
-            const imgData = new ImageData(NUMBER_IMAGE_WIDTH, NUMBER_IMAGE_HEIGHT)
+            const imgData = new ImageData(DIGIT_IMAGE_WIDTH, DIGIT_IMAGE_HEIGHT)
             const data = new Uint8Array(image.data.data)
-            for (let i = 0; i < NUMBER_IMAGE_SIZE; i++) {
+            for (let i = 0; i < DIGIT_IMAGE_SIZE; i++) {
                 imgData.data[i*4] = data[i]
                 imgData.data[i*4+1] = data[i]
                 imgData.data[i*4+2] = data[i]
