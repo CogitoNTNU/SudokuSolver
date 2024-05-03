@@ -1,11 +1,12 @@
 "use client"
+import styles from "./page.module.scss"
 import { useState } from "react"
-
+import { LayersModel } from "@tensorflow/tfjs"
 import { SudokuApplicationContext } from "./context/sudokuApplication/SudokuApplication"
 import { SudokuState, SUDOKU_SIZE } from "./context/sudokuApplication/Types"
 import { CameraState } from "./components/Camera/Types"
+import Image from 'next/image'
 import SudokuApplicationElement from "./components/SudokuApplication/SudokuApplication"
-import { LayersModel } from "@tensorflow/tfjs"
 
 
 export default function Home() {
@@ -33,7 +34,31 @@ export default function Home() {
 
     return (
         <SudokuApplicationContext.Provider value={application}>
-            <SudokuApplicationElement />
+            <header className={styles.header}>
+                <a className={styles.cogitoLogo} href="https://www.cogito-ntnu.no">
+                    <Image src="/cogito_white.svg" width={82} height={70} alt="cogito logo" />
+                </a>
+                <h1 className={styles.title}>SudokuSolver</h1>
+            </header>
+            <main className={styles.main}>
+                <SudokuApplicationElement />
+            </main>
+            <footer className={styles.footer}>
+                <div className={styles.sudokuLogo}>
+                    <Image src="/sudoku_logo.png" width={100} height={100} alt="sudoku logo" />
+                    <div className={styles.sudokuLogoText}>
+                        <p className={styles.sudokuLogoTitle}>SudokuSolver</p>
+                        <p className={styles.sudokuLogoYear}>2024</p>
+                    </div>
+                </div>
+                <div className={styles.info}>
+                    <a className={styles.source} href="https://github.com/CogitoNTNU/SudokuSolver">
+                        <Image src="/github.svg" width={32} height={32} alt="GitHub logo" />
+                        <p>Source Code</p>
+                    </a>
+                    <p className={styles.description}>SudokuSolver uses a combination of computer vision and digit recognition with a convolutional neural network to look for and solve sudokus.</p>
+                </div>
+            </footer>
         </SudokuApplicationContext.Provider>
     )
 }

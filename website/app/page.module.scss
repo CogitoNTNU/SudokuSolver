@@ -1,0 +1,72 @@
+.header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    background-color: rgb(152, 30, 20);
+    padding: 1em 1.5em;
+    margin-bottom: 2em;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.cogitoLogo {
+    grid-column: 1;
+}
+
+.title {
+    grid-column: 2;
+    color: white;
+    text-shadow: 4px 4px 4px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+.main {
+    flex: 1;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    background-color: #1E1E1E;
+    color: white;
+    align-items: center;
+    padding: 1em 1.5em;
+    position: relative;
+    bottom: 0;
+}
+
+.sudokuLogo {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+}
+
+.sudokuLogoText {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.sudokuLogoTitle {
+    font-weight: bold;
+    margin: 0;
+}
+
+.sudokuLogoYear {
+    font-size: 0.8em;
+    margin: 0;
+}
+
+.source {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    color: white;
+    gap: 0.3em;
+    font-weight: bold;
+}
+
+.description {
+    width: 40vw;
+    text-align: right;
+}
