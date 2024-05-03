@@ -8,23 +8,21 @@ export default function CameraButton() {
     const application = useSudokuApplicationContext()
 
     return (
-        <div className={styles.circle}>
-            {
-                application.cameraState == CameraState.Off
-                ?
-                    <div className={styles.inactive} onClick={() => {
-                        application.setSudokuState(SudokuState.NotFound)
-                        application.setCameraState(CameraState.Pending)
-                    }}
-                    ></div>
-                    :
-                    <div className={styles.active} onClick={() => {
-                        if (application.cameraState == CameraState.On) {
-                            application.setCameraState(CameraState.Off)
-                        }
-                    }}
-                    ></div>
-            }
-        </div>
+        application.cameraState == CameraState.Off
+        ? 
+            <div className={styles.circle} onClick={() => {
+                application.setSudokuState(SudokuState.NotFound)
+                application.setCameraState(CameraState.Pending)
+            }}>
+                <div className={styles.inactive}></div>
+            </div>
+        : 
+            <div className={styles.circle} onClick={() => {
+                if (application.cameraState == CameraState.On) {
+                    application.setCameraState(CameraState.Off)
+                }
+            }}>
+                <div className={styles.active}></div>
+            </div>
     )
 }
