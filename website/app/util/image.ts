@@ -59,7 +59,7 @@ export async function videoCallback(video: HTMLVideoElement, application: Sudoku
         if (application.sudokuState == SudokuState.Solved) {
             const solutionImg = new cv.Mat(400, 400, cv.CV_8UC4)
             solutionImg.setTo(new cv.Scalar(0, 0, 0, 0))
-            drawSolutionOnImg(solutionImg, application.solution)
+            drawSolutionOnImg(solutionImg, application.solution, 2)
             const transformedSolutionImg = new cv.Mat()
             const solutionCorners = [0, 0, solutionImg.cols, 0, solutionImg.cols, solutionImg.rows, 0, solutionImg.rows]
             transformImgSection(solutionImg, transformedSolutionImg, solutionCorners, flatPoints, new cv.Size(video.videoWidth, video.videoHeight))
@@ -140,16 +140,16 @@ export function transformImgSection(src: cv.Mat, dst: cv.Mat, inputPoints: numbe
 }
 
 
-export function drawSolutionOnImg(img: cv.Mat, solution: Uint8Array) {
+export function drawSolutionOnImg(img: cv.Mat, solution: Uint8Array, thickness: number = 1) {
     const color = new cv.Scalar(0, 0, 0, 255)
     const fontFace = cv.FONT_HERSHEY_SIMPLEX
     const size = img.cols / SUDOKU_WIDTH
-    const fontScale = size / DIGIT_IMAGE_WIDTH * 0.75
+    const fontScale = size / DIGIT_IMAGE_WIDTH * 0.6
     for (let i = 0; i < SUDOKU_SIZE; i++) {
         if (solution[i] != 0) {
             let x = (i%SUDOKU_WIDTH) * size
             let y = Math.floor(i/SUDOKU_WIDTH) * size
-            cv.putText(img, solution[i].toString(), new cv.Point(x + size*0.2, y+size*0.8), fontFace, fontScale, color, 2)
+            cv.putText(img, solution[i].toString(), new cv.Point(x + size*0.2, y+size*0.8), fontFace, fontScale, color, thickness, cv.LINE_AA)
         }
     }
 }
