@@ -82,6 +82,6 @@ export default function CameraFeed(props: CameraFeedProps) {
 
 
     return (
-        <video ref={props.videoRef} playsInline style={{ backgroundColor: 'black' }}></video>
+        <video width={props.width} height={props.height} ref={props.videoRef} playsInline style={{ backgroundColor: 'black' }}></video>
     )
 }

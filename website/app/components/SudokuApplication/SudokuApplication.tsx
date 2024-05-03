@@ -90,7 +90,7 @@ export default function SudokuApplicationElement() {
             <div className={styles.sudokuApplication}>
                 <div className={styles.cameraWrapper}>
                     <div ref={cameraRef} className={styles.camera}>
-                        <CameraFeed videoRef={videoRef} cameraState={application.cameraState} setCameraState={application.setCameraState} constraints={constraints} callbackFunction={callbackFunction}/>
+                        <CameraFeed width={cameraRef.current?.clientWidth} height={cameraRef.current?.clientHeight} videoRef={videoRef} cameraState={application.cameraState} setCameraState={application.setCameraState} constraints={constraints} callbackFunction={callbackFunction}/>
                         <canvas className={`${styles.overlay} ${(application.sudokuState == SudokuState.Solved && application.cameraState == CameraState.On) ? "" : styles.hidden}`} ref={overlayCanvasRef}></canvas>
                         <canvas className={`${styles.solutionCanvas} ${(application.sudokuState != SudokuState.NotFound && application.cameraState == CameraState.Off ? "" : styles.hidden)}`} ref={solutionCanvasRef}></canvas>
                     </div>

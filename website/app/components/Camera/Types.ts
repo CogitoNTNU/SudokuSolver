@@ -6,6 +6,8 @@ export interface CameraFeedProps {
     setCameraState: Dispatch<SetStateAction<CameraState>>,
     constraints: MediaStreamConstraints
     callbackFunction?: Function,
+    width?: number,
+    height?: number
 }
 
 export enum CameraState {
