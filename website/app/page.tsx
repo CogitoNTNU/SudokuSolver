@@ -6,7 +6,7 @@ import { SudokuApplicationContext } from "./context/sudokuApplication/SudokuAppl
 import { SudokuState, SUDOKU_SIZE } from "./context/sudokuApplication/Types"
 import { CameraState } from "./components/Camera/Types"
 import Image from 'next/image'
-import SudokuApplicationElement from "./components/SudokuApplication/SudokuApplication"
+import SudokuApplicationElement from "./components/SudokuApplication/SudokuApplicationElement"
 
 
 export default function Home() {
@@ -45,10 +45,17 @@ export default function Home() {
             </main>
             <footer className={styles.footer}>
                 <div className={styles.sudokuLogo}>
-                    <Image src="/sudoku_logo.png" width={100} height={100} alt="sudoku logo" />
-                    <div className={styles.sudokuLogoText}>
-                        <p className={styles.sudokuLogoTitle}>SudokuSolver</p>
-                        <p className={styles.sudokuLogoYear}>2024</p>
+                    <Image src="/sudoku_logo.png" width={150} height={150} alt="sudoku logo" />
+                    <div>
+                        <p className={styles.membersHeader}>Prosjektmedlemmer</p>
+                        <ul className={styles.membersList}>
+                            <li>Andreas Jonsterhaug</li>
+                            <li>Afras Mansoor</li>
+                            <li>Ulrikke Kvaal</li>
+                            <li>Igor Iwanicki</li>
+                            <li>Ella Octava</li>
+                            <li>Lotta Jensen</li>
+                        </ul>
                     </div>
                 </div>
                 <div className={styles.info}>

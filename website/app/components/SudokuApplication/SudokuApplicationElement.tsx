@@ -1,5 +1,5 @@
 "use client"
-import styles from "./SudokuApplication.module.scss"
+import styles from "./SudokuApplicationElement.module.scss"
 import CameraFeed from "../Camera/CameraFeed"
 import CameraButton from "../Camera/CameraButton"
 import { useRef, useEffect, useCallback, useState } from "react"
@@ -54,7 +54,6 @@ export default function SudokuApplicationElement() {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 
-        console.log("Setting feed to", width, height)
         if (isMobile && isPortrait && isSafari) {
             setConstraints({
                 video: {
@@ -86,19 +85,17 @@ export default function SudokuApplicationElement() {
 
 
     return (
-        <>
-            <div className={styles.sudokuApplication}>
-                <div className={styles.cameraWrapper}>
-                    <div ref={cameraRef} className={styles.camera}>
-                        <CameraFeed width={cameraRef.current?.clientWidth} height={cameraRef.current?.clientHeight} videoRef={videoRef} cameraState={application.cameraState} setCameraState={application.setCameraState} constraints={constraints} callbackFunction={callbackFunction}/>
-                        <canvas className={`${styles.overlay} ${(application.sudokuState == SudokuState.Solved && application.cameraState == CameraState.On) ? "" : styles.hidden}`} ref={overlayCanvasRef}></canvas>
-                        <canvas className={`${styles.solutionCanvas} ${(application.sudokuState != SudokuState.NotFound && application.cameraState == CameraState.Off ? "" : styles.hidden)}`} ref={solutionCanvasRef}></canvas>
-                    </div>
-                    <div className={styles.buttonWrapper}>
-                        <CameraButton/>
-                    </div>
+        <div ref={cameraRef} className={styles.camera}>
+            <CameraFeed width={cameraRef.current?.clientWidth} height={cameraRef.current?.clientHeight} videoRef={videoRef} cameraState={application.cameraState} setCameraState={application.setCameraState} constraints={constraints} callbackFunction={callbackFunction}/>
+            <canvas className={`${styles.overlay} ${(application.sudokuState == SudokuState.Solved && application.cameraState == CameraState.On) ? "" : styles.hidden}`} ref={overlayCanvasRef}></canvas>
+            <div className={styles.SolutionAndButtonWrapper}>
+                <div className={styles.solutionCanvasWrapper}>
+                    <canvas className={`${(application.sudokuState != SudokuState.NotFound && application.cameraState == CameraState.Off ? "" : styles.hidden)}`} ref={solutionCanvasRef}></canvas>
+                </div>
+                <div className={styles.buttonWrapper}>
+                    <CameraButton/>
                 </div>
             </div>
-        </>
+        </div>
     )
 }

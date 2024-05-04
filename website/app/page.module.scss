@@ -55,20 +55,14 @@
     }
 }
 
-.sudokuLogoText {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.sudokuLogoTitle {
+.membersHeader {
+    font-size: 1.25em;
     font-weight: bold;
-    margin: 0;
+    text-align: center;
 }
 
-.sudokuLogoYear {
-    font-size: 0.8em;
-    margin: 0;
+.membersList {
+    padding-right: 40px;
 }
 
 .source {
