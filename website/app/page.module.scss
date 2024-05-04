@@ -32,6 +32,17 @@
     justify-content: center;
 }
 
+.hidden {
+    display: none;
+}
+
+.overlayText {
+    color: white;
+    position: absolute;
+    width: 70vw;
+    margin-top: 3em;
+}
+
 .footer {
     display: flex;
     justify-content: space-between;

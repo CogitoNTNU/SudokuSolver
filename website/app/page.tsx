@@ -5,7 +5,8 @@ import { LayersModel } from "@tensorflow/tfjs"
 import { SudokuApplicationContext } from "./context/sudokuApplication/SudokuApplication"
 import { SudokuState, SUDOKU_SIZE } from "./context/sudokuApplication/Types"
 import { CameraState } from "./components/Camera/Types"
-import Image from 'next/image'
+import Image from "next/image"
+import Head from "next/head"
 import SudokuApplicationElement from "./components/SudokuApplication/SudokuApplicationElement"
 
 
@@ -34,6 +35,9 @@ export default function Home() {
 
     return (
         <SudokuApplicationContext.Provider value={application}>
+            <Head>
+                <link rel="icon" href="/favicon.ico" sizes="any" />
+            </Head>
             <header className={styles.header}>
                 <a className={styles.cogitoLogo} href="https://www.cogito-ntnu.no">
                     <Image src="/cogito_white.svg" width={82} height={70} alt="cogito logo" />
@@ -42,21 +46,13 @@ export default function Home() {
             </header>
             <main className={styles.main}>
                 <SudokuApplicationElement />
+                <p className={sudokuState == SudokuState.NotFound && cameraState == CameraState.Off && model ? styles.overlayText : styles.hidden}>
+                    Start the camera and position the sudoku as the main focus. For best possible performance make sure the sudoku is well-lit, and that no other large objects are in the frame.
+                </p>
             </main>
             <footer className={styles.footer}>
                 <div className={styles.sudokuLogo}>
                     <Image src="/sudoku_logo.png" width={120} height={120} alt="sudoku logo" />
-                    {/* <div>
-                        <p className={styles.membersHeader}>Prosjektmedlemmer</p>
-                        <ul className={styles.membersList}>
-                            <li>Andreas Jonsterhaug</li>
-                            <li>Afras Mansoor</li>
-                            <li>Ulrikke Kvaal</li>
-                            <li>Igor Iwanicki</li>
-                            <li>Ella Octava</li>
-                            <li>Lotta Jensen</li>
-                        </ul>
-                    </div> */}
                     <div>
                         <p className={styles.sudokuLogoHeader}>SudokuSolver</p>
                         <p className={styles.sudokuLogoYear}>2024</p>
@@ -67,7 +63,6 @@ export default function Home() {
                         <Image src="/github.svg" width={32} height={32} alt="GitHub logo" />
                         <p>Source Code</p>
                     </a>
-                    {/* <p className={styles.description}>SudokuSolver uses a combination of computer vision and digit recognition with a convolutional neural network to look for and solve sudokus.</p> */}
                     <p className={styles.members}>Made by Andreas Jonsterhaug, Afras Mansoor, Ulrikke Kvaal, Igor Iwanicki, Ella Octava and Lotta Jensen</p>
                 </div>
             </footer>
