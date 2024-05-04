@@ -39,8 +39,12 @@
 .overlayText {
     color: white;
     position: absolute;
-    width: 70vw;
+    width: 650px;
     margin-top: 3em;
+    
+    @media (max-width: 800px) {
+        width: 70vw;
+    }
 }
 
 .footer {
