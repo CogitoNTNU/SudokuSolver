@@ -45,8 +45,8 @@ export default function Home() {
             </main>
             <footer className={styles.footer}>
                 <div className={styles.sudokuLogo}>
-                    <Image src="/sudoku_logo.png" width={150} height={150} alt="sudoku logo" />
-                    <div>
+                    <Image src="/sudoku_logo.png" width={120} height={120} alt="sudoku logo" />
+                    {/* <div>
                         <p className={styles.membersHeader}>Prosjektmedlemmer</p>
                         <ul className={styles.membersList}>
                             <li>Andreas Jonsterhaug</li>
@@ -56,6 +56,10 @@ export default function Home() {
                             <li>Ella Octava</li>
                             <li>Lotta Jensen</li>
                         </ul>
+                    </div> */}
+                    <div>
+                        <p className={styles.sudokuLogoHeader}>SudokuSolver</p>
+                        <p className={styles.sudokuLogoYear}>2024</p>
                     </div>
                 </div>
                 <div className={styles.info}>
@@ -63,7 +67,8 @@ export default function Home() {
                         <Image src="/github.svg" width={32} height={32} alt="GitHub logo" />
                         <p>Source Code</p>
                     </a>
-                    <p className={styles.description}>SudokuSolver uses a combination of computer vision and digit recognition with a convolutional neural network to look for and solve sudokus.</p>
+                    {/* <p className={styles.description}>SudokuSolver uses a combination of computer vision and digit recognition with a convolutional neural network to look for and solve sudokus.</p> */}
+                    <p className={styles.members}>Made by Andreas Jonsterhaug, Afras Mansoor, Ulrikke Kvaal, Igor Iwanicki, Ella Octava and Lotta Jensen</p>
                 </div>
             </footer>
         </SudokuApplicationContext.Provider>

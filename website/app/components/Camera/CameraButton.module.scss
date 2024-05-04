@@ -5,6 +5,11 @@
     border: 5px solid white;
     display: grid;
     place-items: center;
+
+    @media (max-width: 800px) {
+        width: 80px;
+        height: 80px;
+    }
 }
 
 .active {
