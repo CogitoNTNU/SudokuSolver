@@ -48,7 +48,7 @@ OpenCV.js is then used to find contours, and the largest contour with the shape 
 <img width="30%" alt="Screenshot 2024-04-28 at 10 52 45" src="https://github.com/CogitoNTNU/SudokuSolver/assets/72311591/566298f3-cb06-4042-a600-81ae0bcb0653">
 
 ### Predicting the digits already present
-To predict the digits, the sudoku is split up into 81 small squares, one for each cell in the sudoku. The background of the cells are removed by setting the pixel values that are under the mean to 0, and empty cells are filtered out by looking at the average pixel value in the cells. The lines used to seperate the cells in the sudoku are removed by clearing the borders of each cell. When removing the background, parts of the digits are also removed, which makes them thinner. Therefore, a dilation kernel is used the increase the thickness of the digits. The result looks something like this:
+To predict the digits, the sudoku is split up into 81 small squares, one for each cell in the sudoku. The background of the cells are removed by setting the pixel values that are under the mean to 0, and empty cells are filtered out by looking at the average pixel value in the cells. The lines used to seperate the cells in the sudoku are removed by clearing the borders of each cell. When removing the background, parts of the digits are also removed, which makes them thinner. Therefore, a dilation kernel is used to increase the thickness of the digits. The result looks something like this:
 
 <img width="255" alt="Screenshot 2024-04-28 at 10 53 02" src="https://github.com/CogitoNTNU/SudokuSolver/assets/72311591/a7bbf766-6daa-4709-b448-e5449435e3b3">
 
