@@ -1,5 +1,5 @@
 # SudokuSolver
-The project is hosted <a href="https://sudoku-solver-sudokusolver.vercel.app">here</a>
+The project is hosted <a href="https://sudokusolver.afrasum.dev">here</a>
 
 ---
 <!--  <img src="https://github.com/CogitoNTNU/SudokuSolver/assets/72311591/d5fad2ae-193a-4558-9479-a4bf0450d4b6" width="50px" alt="SudokuSolverLogo"> -->
